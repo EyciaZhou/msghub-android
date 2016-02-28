@@ -1,5 +1,7 @@
 package me.eycia.msghub_android;
 
+import android.telecom.Call;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,6 +26,54 @@ public class API {
         long lstModify = jo.getLong("LastModify");
 
         return new ChanInfo(id, title, lstModify);
+    }
+
+    static private MsgInfo parseMsgInfo(JSONObject jo) throws JSONException {
+        String CoverImgId = "";
+        String Topic = "";
+        if (!jo.isNull("CoverImgId")) {
+            CoverImgId = jo.getString("CoverImgId");
+        }
+        if (!jo.isNull("Topic")) {
+            Topic = jo.getString("Topic");
+        }
+        return new MsgInfo(jo.getString("Id"), jo.getLong("SnapTime"), jo.getLong("PubTime"), jo.getString("SourceURL"),
+                jo.getString("Title"), jo.getString("SubTitle"), CoverImgId, jo.getInt("ViewType"), jo.getString("Frm"),
+                jo.getString("Tag"), Topic);
+    }
+
+    static public MsgInfo[] Page(String ChanId, int Limit, String lstId, long lstti) throws Exception{
+        final String PATH = "page";
+
+        JSONObject jo = http.GetJson(ADDR + PATH + String.format("/%d/%s/%d", Limit, lstId, lstti));
+
+        if (jo.getInt("err") != 0) {
+            throw new Exception(jo.getString("reason"));
+        }
+
+        JSONArray infoArray = jo.getJSONArray("data");
+
+        MsgInfo[] result = new MsgInfo[infoArray.length()];
+
+        for (int i = 0; i < infoArray.length(); i++) {
+            result[i] = parseMsgInfo(infoArray.getJSONObject(i));
+        }
+
+        return result;
+    }
+
+    static public void PageCallback(final String ChanId, final int Limit, final String LstId, final long lstti, final Callback callback) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    MsgInfo[] msgInfo = Page(ChanId, Limit, LstId, lstti);
+                    callback.Succ(msgInfo);
+                } catch (Exception e) {
+                    callback.Err(e);
+                }
+            }
+        }).start();
     }
 
     static public ChanInfo[] ChansInfo() throws Exception {

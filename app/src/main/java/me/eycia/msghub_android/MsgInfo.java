@@ -1,0 +1,36 @@
+package me.eycia.msghub_android;
+
+import android.view.View;
+
+/**
+ * Created by eycia on 2/28/16.
+ */
+public class MsgInfo {
+    public String Id;
+    public long SnapTime;
+    public long PubTime;
+    public String SourceURL;
+    public String Title;
+    public String SubTitle;
+    public String CoverImgId;   //length zero if not have
+    public int ViewType;
+    public String Frm;
+    public String Tag;
+    public String Topic;        //length zero if not have
+
+    public MsgInfo(String Id, long SnapTime, long PubTime, String SourceURL, String Title,
+                    String SubTitle, String CoverImgId, int ViewType, String Frm, String Tag, String Topic) {
+        this.Id = Id;
+        this.SnapTime = SnapTime;
+        this.PubTime = PubTime;
+        this.SourceURL = SourceURL;
+        this.Title = Title;
+        this.SubTitle = SubTitle;
+        this.CoverImgId = CoverImgId;
+        this.ViewType = ViewType;
+        this.Frm = Frm;
+        this.Tag = Tag;
+        this.Topic = Topic;
+
+    }
+}

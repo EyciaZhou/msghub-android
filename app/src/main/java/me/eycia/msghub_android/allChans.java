@@ -1,5 +1,6 @@
 package me.eycia.msghub_android;
 
+import android.app.Activity;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -21,6 +22,7 @@ public class allChans extends FragmentPagerAdapter  {
      */
 
     private ChanInfo[] chans;
+    private Activity activity;
 
     public interface Refresh {
         void refresh(ChanInfo[] cs);
@@ -30,10 +32,12 @@ public class allChans extends FragmentPagerAdapter  {
         void err(Exception e);
     }
 
-    public allChans(FragmentManager fm) {
+    public allChans(FragmentManager fm, Activity activity) {
         super(fm);
 
         chans = new ChanInfo[0];
+
+        this.activity = activity;
     }
 
     public void Update(ChanInfo[] cs) {
@@ -45,7 +49,7 @@ public class allChans extends FragmentPagerAdapter  {
     public Fragment getItem(int position) {
         // getItem is called to instantiate the fragment for the given page.
         // Return a PlaceholderFragment (defined as a static inner class below).
-        return Chan.newInstance(chans[position]);
+        return Chan.newInstance(chans[position], activity);
     }
 
     @Override

@@ -29,7 +29,7 @@ public class msgsDisplay extends AppCompatActivity {
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
 
-        mAllChans = new allChans(getSupportFragmentManager());
+        mAllChans = new allChans(getSupportFragmentManager(), this);
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
