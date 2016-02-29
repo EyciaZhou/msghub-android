@@ -4,10 +4,10 @@ package me.eycia.msghub_android;
  * Created by eycia on 2/28/16.
  */
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +24,6 @@ import java.util.HashMap;
  */
 public class Chan extends Fragment {
     private ChanInfo chanInfo;
-    private Activity activity;
 
     private MsgInfo[] msgInfos;
 
@@ -35,10 +34,13 @@ public class Chan extends Fragment {
      * Returns a new instance of this fragment for the given section
      * number.
      */
-    public static Chan newInstance(ChanInfo chanInfo, Activity activity) {
+    public static Chan newInstance(ChanInfo chanInfo) {
         Chan fragment = new Chan();
-        fragment.chanInfo = chanInfo;
-        fragment.activity = activity;
+
+        Bundle mBundle = new Bundle();
+        mBundle.putParcelable("chanInfo", chanInfo);
+
+        fragment.setArguments(mBundle);
 
         return fragment;
     }
@@ -57,19 +59,27 @@ public class Chan extends Fragment {
             ls.add(map);
         }
 
-        lv.setAdapter(new SimpleAdapter(activity, ls, R.layout.msg_on_chan, new String[]{"ItemTitle", "ItemText"},
+        lv.setAdapter(new SimpleAdapter(getActivity(), ls, R.layout.msg_on_chan, new String[]{"ItemTitle", "ItemText"},
                 new int[]{R.id.ItemTitle, R.id.ItemText}));
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putParcelableArray("msgInfo", msgInfos);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        this.chanInfo = getArguments().getParcelable("chanInfo");
+
         View rootView = inflater.inflate(R.layout.fragment_msgs_display, container, false);
         TextView textView = (TextView) rootView.findViewById(R.id.section_label);
         textView.setText(chanInfo.Title);
 
         mrl = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeRefresh);
-
         lv = (ListView) rootView.findViewById(R.id.listView2);
 
 
@@ -80,7 +90,7 @@ public class Chan extends Fragment {
 
                     @Override
                     public void Succ(final Object o) {
-                        activity.runOnUiThread(new Runnable() {
+                        getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 mrl.setRefreshing(false);
@@ -94,12 +104,12 @@ public class Chan extends Fragment {
 
                     @Override
                     public void Err(final Exception e) {
-                        activity.runOnUiThread(new Runnable() {
+                        getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 mrl.setRefreshing(false);
 
-                                Toast.makeText(activity.getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getActivity().getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
@@ -110,8 +120,12 @@ public class Chan extends Fragment {
 
         mrl.setOnRefreshListener(refreshListener);
 
-        mrl.setRefreshing(true);
-        refreshListener.onRefresh();
+        if (savedInstanceState == null) {
+            mrl.setRefreshing(true);
+            refreshListener.onRefresh();
+        } else {
+            Update((MsgInfo[])savedInstanceState.getParcelableArray("msgInfo"));
+        }
 
         return rootView;
     }

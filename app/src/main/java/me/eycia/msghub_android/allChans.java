@@ -22,22 +22,11 @@ public class allChans extends FragmentPagerAdapter  {
      */
 
     private ChanInfo[] chans;
-    private Activity activity;
 
-    public interface Refresh {
-        void refresh(ChanInfo[] cs);
-    }
-
-    public interface Err {
-        void err(Exception e);
-    }
-
-    public allChans(FragmentManager fm, Activity activity) {
+    public allChans(FragmentManager fm) {
         super(fm);
 
         chans = new ChanInfo[0];
-
-        this.activity = activity;
     }
 
     public void Update(ChanInfo[] cs) {
@@ -49,7 +38,7 @@ public class allChans extends FragmentPagerAdapter  {
     public Fragment getItem(int position) {
         // getItem is called to instantiate the fragment for the given page.
         // Return a PlaceholderFragment (defined as a static inner class below).
-        return Chan.newInstance(chans[position], activity);
+        return Chan.newInstance(chans[position]);
     }
 
     @Override

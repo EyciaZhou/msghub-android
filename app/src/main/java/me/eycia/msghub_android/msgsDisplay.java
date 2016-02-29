@@ -19,6 +19,8 @@ public class msgsDisplay extends AppCompatActivity {
     private ViewPager mViewPager;
     private SlidingTabLayout mSlidingTabLayout;
 
+    private ChanInfo[] cs;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,7 +31,7 @@ public class msgsDisplay extends AppCompatActivity {
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
 
-        mAllChans = new allChans(getSupportFragmentManager(), this);
+        mAllChans = new allChans(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
@@ -39,31 +41,38 @@ public class msgsDisplay extends AppCompatActivity {
         mSlidingTabLayout.setViewPager(mViewPager);
         mSlidingTabLayout.setSelectedIndicatorColors(0xFF00BFA5);
 
-        API.ChansInfoCallback(new API.Callback() {
-            @Override
-            public void Succ(final Object o) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (o != null) {
-                            final ChanInfo[] cs = (ChanInfo[]) (o);
-                            mAllChans.Update(cs);
-                            mSlidingTabLayout.setViewPager(mViewPager);
-                        }
-                    }
-                });
-            }
+        if (savedInstanceState == null) {
 
-            @Override
-            public void Err(final Exception e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        });
+            API.ChansInfoCallback(new API.Callback() {
+                @Override
+                public void Succ(final Object o) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (o != null) {
+                                cs = (ChanInfo[]) (o);
+                                mAllChans.Update(cs);
+                                mSlidingTabLayout.setViewPager(mViewPager);
+                            }
+                        }
+                    });
+                }
+
+                @Override
+                public void Err(final Exception e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            });
+        } else {
+            cs = (ChanInfo[])savedInstanceState.getParcelableArray("chanInfos");
+            mAllChans.Update(cs);
+            mSlidingTabLayout.setViewPager(mViewPager);
+        }
 
       FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
       fab.setOnClickListener(new View.OnClickListener() {
@@ -97,6 +106,12 @@ public class msgsDisplay extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putParcelableArray("chanInfos", cs);
     }
 }
 
