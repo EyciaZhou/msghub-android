@@ -3,8 +3,6 @@ package me.eycia.msghub_android;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.json.JSONObject;
-
 /**
  * Created by eycia on 2/27/16.
  */

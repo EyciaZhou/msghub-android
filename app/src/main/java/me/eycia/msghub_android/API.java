@@ -1,10 +1,10 @@
 package me.eycia.msghub_android;
 
-import android.telecom.Call;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.net.URL;
 
 import me.eycia.http;
 
@@ -45,7 +45,15 @@ public class API {
     static public MsgInfo[] Page(String ChanId, int Limit, String lstId, long lstti) throws Exception{
         final String PATH = "page";
 
-        JSONObject jo = http.GetJson(ADDR + PATH + String.format("/%d/%s/%d", Limit, lstId, lstti));
+        String url;
+
+        if (ChanId == "") {
+            url = ADDR + String.format("page/%d/%s/%d", Limit, lstId, lstti);
+        } else {
+            url = ADDR + String.format("chan/%s/page/%d/%s/%d", ChanId, Limit, lstId, lstti);
+        }
+
+        JSONObject jo = http.GetJson(url);
 
         if (jo.getInt("err") != 0) {
             throw new Exception(jo.getString("reason"));

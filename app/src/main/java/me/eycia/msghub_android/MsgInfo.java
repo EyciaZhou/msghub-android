@@ -2,12 +2,11 @@ package me.eycia.msghub_android;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.View;
 
 /**
  * Created by eycia on 2/28/16.
  */
-public class MsgInfo implements Parcelable {
+public class MsgInfo implements Parcelable, Comparable<MsgInfo> {
     public String Id;
     public long SnapTime;
     public long PubTime;
@@ -80,5 +79,10 @@ public class MsgInfo implements Parcelable {
         dest.writeString(Frm);
         dest.writeString(Tag);
         dest.writeString(Topic);
+    }
+
+    @Override
+    public int compareTo(MsgInfo another) {
+        return Long.compare(another.SnapTime, SnapTime);
     }
 }
