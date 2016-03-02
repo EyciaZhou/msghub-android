@@ -1,22 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
 
-        android:id="@+id/MyListItem"
-        android:paddingBottom="3dip"
-        android:paddingLeft="10dip">
-        <TextView
-            android:layout_height="wrap_content"
-            android:layout_width="fill_parent"
-            android:id="@+id/ItemTitle"
-            android:textSize="20dip">
-        </TextView>
-        <TextView
-            android:layout_height="wrap_content"
-            android:layout_width="fill_parent"
-            android:id="@+id/ItemText"
-            android:textSize="10dip">
-        </TextView>
+    android:id="@+id/MyListItem"
+    android:paddingBottom="3dip"
+    android:paddingLeft="3dip">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@+id/ListCover"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            fresco:progressBarImage="@drawable/circle"
+            fresco:progressBarAutoRotateInterval="3000"
+            fresco:progressBarImageScaleType="fitCenter"
+            />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:id="@+id/ItemTitle"
+                android:textSize="20dip">
+            </TextView>
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:id="@+id/ItemText"
+                android:textSize="10dip">
+            </TextView>
+        </LinearLayout>
+
+    </LinearLayout>
+
 
 </LinearLayout>

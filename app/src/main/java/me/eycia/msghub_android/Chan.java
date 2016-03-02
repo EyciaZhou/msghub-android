@@ -188,13 +188,14 @@ public class Chan extends Fragment {
             HashMap<String, String> map = new HashMap<String, String>();
             map.put("ItemTitle", this.msgInfos[i].Title);
             map.put("ItemText", this.msgInfos[i].SubTitle);
+            map.put("ListCover", API.PicURL(this.msgInfos[i].CoverImgId));
             ls.add(map);
         }
 
         int cachePos = lv.getFirstVisiblePosition();
 
-        lv.setAdapter(new SimpleAdapter(getActivity(), ls, R.layout.msg_on_chan, new String[]{"ItemTitle", "ItemText"},
-                new int[]{R.id.ItemTitle, R.id.ItemText}));
+        lv.setAdapter(new SimpleAdapter(getActivity(), ls, R.layout.msg_on_chan, new String[]{"ItemTitle", "ItemText", "ListCover"},
+                new int[]{R.id.ItemTitle, R.id.ItemText, R.id.ListCover}));
 
         lv.setSelectionFromTop(cachePos, 0);
 

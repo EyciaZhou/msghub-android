@@ -11,6 +11,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
+
 import me.eycia.view.SlidingTabLayout;
 
 public class msgsDisplay extends AppCompatActivity {
@@ -24,6 +26,9 @@ public class msgsDisplay extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Fresco.initialize(this);
+
         setContentView(R.layout.activity_msgs_display);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

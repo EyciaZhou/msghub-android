@@ -13,11 +13,15 @@ import me.eycia.http;
  */
 public class API {
     //static final String ADDR = "http://msghub.eycia.me/";
-    static final String ADDR = "http://aliyun1.eycia.me:4000/msgs/";
+    static final String ADDR = "http://msghub.eycia.me:4000/msgs/";
 
     public interface Callback {
         void Succ(Object o);
         void Err(Exception e);
+    }
+
+    static public String PicURL(String Id) {
+        return "http://msghub.eycia.me:4000/pic/" + Id;
     }
 
     static private ChanInfo parseChanInfo(JSONObject jo) throws JSONException {
