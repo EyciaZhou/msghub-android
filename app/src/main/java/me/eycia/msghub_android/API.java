@@ -13,7 +13,9 @@ import me.eycia.http;
  */
 public class API {
     //static final String ADDR = "http://msghub.eycia.me/";
-    static final String ADDR = "http://msghub.eycia.me:4000/msgs/";
+    static final String ADDR = "http://msghub.eycia.me:4000/";
+    static final String ADDR_MSGS = "http://msghub.eycia.me:4000/msgs/";
+    static final String ADDR_PIC = "http://msghub.eycia.me:4000/pic/";
 
     public interface Callback {
         void Succ(Object o);
@@ -21,7 +23,11 @@ public class API {
     }
 
     static public String PicURL(String Id) {
-        return "http://msghub.eycia.me:4000/pic/" + Id;
+        return ADDR_PIC + Id;
+    }
+
+    static private Msg parseMsg(JSONObject jo) throws JSONException {
+        return new Msg(parseMsgInfo(jo), jo.getString("Body"));
     }
 
     static private ChanInfo parseChanInfo(JSONObject jo) throws JSONException {
@@ -46,15 +52,41 @@ public class API {
                 jo.getString("Tag"), Topic);
     }
 
+    static public Msg Msg(String Id) throws Exception{
+        final String PATH = "";
+
+        JSONObject jo = http.GetJson(ADDR_MSGS + PATH + Id);
+
+        if (jo.getInt("err") != 0) {
+            throw new Exception(jo.getString("reason"));
+        }
+
+        return parseMsg(jo.getJSONObject("data"));
+    }
+
+    static public void MsgCallback(final String Id, final Callback callback) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Msg msg = Msg(Id);
+                    callback.Succ(msg);
+                } catch (Exception e) {
+                    callback.Err(e);
+                }
+            }
+        }).start();
+    }
+
     static public MsgInfo[] Page(String ChanId, int Limit, String lstId, long lstti) throws Exception{
         final String PATH = "page";
 
         String url;
 
         if (ChanId == "") {
-            url = ADDR + String.format("page/%d/%s/%d", Limit, lstId, lstti);
+            url = ADDR_MSGS + String.format("page/%d/%s/%d", Limit, lstId, lstti);
         } else {
-            url = ADDR + String.format("chan/%s/page/%d/%s/%d", ChanId, Limit, lstId, lstti);
+            url = ADDR_MSGS + String.format("chan/%s/page/%d/%s/%d", ChanId, Limit, lstId, lstti);
         }
 
         JSONObject jo = http.GetJson(url);
@@ -91,7 +123,7 @@ public class API {
     static public ChanInfo[] ChansInfo() throws Exception {
         final String PATH = "chan";
 
-        JSONObject jo = http.GetJson(ADDR+PATH);
+        JSONObject jo = http.GetJson(ADDR_MSGS+PATH);
 
         if (jo.getInt("err") != 0) {
             throw new Exception(jo.getString("reason"));

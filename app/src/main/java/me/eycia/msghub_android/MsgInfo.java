@@ -32,7 +32,9 @@ public class MsgInfo implements Parcelable, Comparable<MsgInfo> {
         this.Frm = Frm;
         this.Tag = Tag;
         this.Topic = Topic;
+    }
 
+    public MsgInfo() {
     }
 
     protected MsgInfo(Parcel in) {

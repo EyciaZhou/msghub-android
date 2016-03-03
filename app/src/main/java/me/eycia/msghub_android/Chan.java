@@ -4,6 +4,7 @@ package me.eycia.msghub_android;
  * Created by eycia on 2/28/16.
  */
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -12,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -216,8 +218,6 @@ public class Chan extends Fragment {
         this.chanInfo = getArguments().getParcelable("chanInfo");
 
         View rootView = inflater.inflate(R.layout.fragment_msgs_display, container, false);
-        TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-        textView.setText(chanInfo.Title);
 
         mrl = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeRefresh);
         lv = (ListView) rootView.findViewById(R.id.listView2);
@@ -241,6 +241,19 @@ public class Chan extends Fragment {
             this.msgIds = (Set<String>) savedInstanceState.getSerializable("msgIds");
             Update();
         }
+
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.i("msghub", String.valueOf(id));
+                if (id < 0) {
+                    return;
+                }
+                Intent intent = new Intent(getActivity(), MsgActivity.class);
+                intent.putExtra("msgid", msgInfos[((int) id)].Id);
+                getActivity().startActivity(intent);
+            }
+        });
 
 
         lv.setOnScrollListener(new AbsListView.OnScrollListener() {
