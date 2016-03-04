@@ -1,10 +1,13 @@
 package me.eycia.msghub_android;
 
+import android.util.Pair;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import me.eycia.http;
 
@@ -17,9 +20,21 @@ public class API {
     static final String ADDR_MSGS = "http://msghub.eycia.me:4000/msgs/";
     static final String ADDR_PIC = "http://msghub.eycia.me:4000/pic/";
 
+    static Pattern pattern = Pattern.compile("(\\d+)\\*(\\d+)");
+
     public interface Callback {
         void Succ(Object o);
         void Err(Exception e);
+    }
+
+    static public Pair<Integer, Integer> ParsePixes(String Pixes) {
+        Matcher matcher = pattern.matcher(Pixes);
+        matcher.find();
+
+        int ws = Integer.parseInt(matcher.group(1));
+        int hs = Integer.parseInt(matcher.group(2));
+
+        return new Pair<>(ws, hs);
     }
 
     static public String PicURL(String Id) {
@@ -27,7 +42,11 @@ public class API {
     }
 
     static private Msg parseMsg(JSONObject jo) throws JSONException {
-        return new Msg(parseMsgInfo(jo), jo.getString("Body"));
+        PicRef[] picRefs = null;
+        if (!jo.isNull("PicRefs")) {
+            picRefs = PicRef.LoadArrayFromJson(jo.getJSONArray("PicRefs"));
+        }
+        return new Msg(parseMsgInfo(jo), jo.getString("Body"), picRefs);
     }
 
     static private ChanInfo parseChanInfo(JSONObject jo) throws JSONException {

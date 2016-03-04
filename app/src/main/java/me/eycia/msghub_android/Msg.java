@@ -8,30 +8,24 @@ import android.os.Parcelable;
  */
 public class Msg extends MsgInfo implements Parcelable {
     public String Body;
+    public PicRef[] PicRefs;
 
     public Msg(String Id, long SnapTime, long PubTime, String SourceURL, String Title, String SubTitle, String CoverImgId, int ViewType, String Frm, String Tag, String Topic, String Body) {
         super(Id, SnapTime, PubTime, SourceURL, Title, SubTitle, CoverImgId, ViewType, Frm, Tag, Topic);
         this.Body = Body;
     }
 
-    public Msg() {
-        super();
-    }
-
-    /*
-    public MsgInfo(String Id, long SnapTime, long PubTime, String SourceURL, String Title,
-                    String SubTitle, String CoverImgId, int ViewType, String Frm, String Tag, String Topic) {
-     */
-
-    public Msg(MsgInfo msgInfo, String body) {
+    public Msg(MsgInfo msgInfo, String body, PicRef[] picRefs) {
         super(msgInfo.Id, msgInfo.SnapTime, msgInfo.PubTime, msgInfo.SourceURL, msgInfo.Title,
                 msgInfo.SubTitle, msgInfo.CoverImgId, msgInfo.ViewType, msgInfo.Frm, msgInfo.Tag, msgInfo.Topic);
         this.Body = body;
+        this.PicRefs = picRefs;
     }
 
     protected Msg(Parcel in) {
         super(in);
         Body = in.readString();
+        PicRefs = (PicRef[]) in.readParcelableArray(PicRef.class.getClassLoader());
     }
 
     public static final Creator<Msg> CREATOR = new Creator<Msg>() {
@@ -55,5 +49,6 @@ public class Msg extends MsgInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeString(Body);
+        dest.writeParcelableArray(PicRefs, flags);
     }
 }
