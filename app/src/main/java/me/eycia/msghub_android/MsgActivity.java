@@ -3,6 +3,7 @@ package me.eycia.msghub_android;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -10,6 +11,7 @@ import android.text.Html;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.util.Pair;
+import android.view.ViewTreeObserver;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.TextView;
@@ -26,8 +28,6 @@ public class MsgActivity extends AppCompatActivity {
     private WebView webView;
     private Msg msg;
 
-    private Html.ImageGetter ImgGetter;
-
     private String ImgRaw = "<center>\n" +
             "<div style=\"width:%dpx\">\n" +
             "<img height=\"%dpx\" width=\"%dpx\" src=\"%s\" border=\"2\">\n" +
@@ -38,17 +38,6 @@ public class MsgActivity extends AppCompatActivity {
             "</center>" +
             "<p></p>";
 
-    private Map<String, PicRef> GenMap() {
-        HashMap<String, PicRef> result = new HashMap<>();
-        if (msg.PicRefs == null) {
-            return result;
-        }
-        for (PicRef p: msg.PicRefs) {
-            result.put(API.PicURL(p.Pid), p);
-        }
-        return result;
-    }
-
     private Pair<Integer, Integer> Scale(Pair<Integer, Integer> ps) {
         float width = webView.getWidth() / webView.getScale() - 50;
 
@@ -57,9 +46,15 @@ public class MsgActivity extends AppCompatActivity {
         return Pair.create((int) (ps.first * rate), (int) (ps.second * rate));
     }
 
-    private String GenBody() {
-        int width = webView.getWidth();
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (msg != null) {
+            Update();
+        }
+    }
 
+    private String GenBody() {
         String result = msg.Body;
         if (msg.PicRefs == null) {
             return result;
@@ -67,6 +62,9 @@ public class MsgActivity extends AppCompatActivity {
         for (PicRef p: msg.PicRefs) {
             if (p.Ref != null && p.Pixes != null) {
                 Pair<Integer, Integer> ps = Scale(API.ParsePixes(p.Pixes));
+                //Log.i("msghub", p.Pixes);
+                //Log.i("msghub", String.valueOf(ps.first));
+                //Log.i("msghub", String.valueOf(ps.second));
 
                 String Des = "";
                 if (p.Description != null) {
@@ -88,8 +86,6 @@ public class MsgActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Fresco.initialize(this);
 
         setContentView(R.layout.activity_msg);
 
@@ -133,7 +129,6 @@ public class MsgActivity extends AppCompatActivity {
 
         } else {
             msg = savedInstanceState.getParcelable("msg");
-            Update();
         }
     }
 

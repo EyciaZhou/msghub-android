@@ -16,7 +16,7 @@
 
         <com.facebook.drawee.view.SimpleDraweeView
             android:id="@+id/ListCover"
-            android:layout_width="40dp"
+            android:layout_width="60dp"
             android:layout_height="40dp"
             fresco:progressBarImage="@drawable/circle"
             fresco:progressBarAutoRotateInterval="3000"
