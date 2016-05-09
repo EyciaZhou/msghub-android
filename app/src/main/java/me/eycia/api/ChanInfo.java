@@ -1,4 +1,4 @@
-package me.eycia.msghub_android;
+package me.eycia.api;
 
 import android.os.Parcel;
 import android.os.Parcelable;

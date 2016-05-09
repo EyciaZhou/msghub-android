@@ -13,6 +13,8 @@ import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 
+import me.eycia.api.API;
+import me.eycia.api.ChanInfo;
 import me.eycia.view.SlidingTabLayout;
 
 public class msgsDisplay extends AppCompatActivity {
@@ -68,6 +70,7 @@ public class msgsDisplay extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            e.printStackTrace();
                             Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
                         }
                     });

@@ -23,6 +23,10 @@ import com.facebook.drawee.view.SimpleDraweeView;
 import java.util.HashMap;
 import java.util.Map;
 
+import me.eycia.api.API;
+import me.eycia.api.Msg;
+import me.eycia.api.PicRef;
+
 public class MsgActivity extends AppCompatActivity {
 
     private WebView webView;
@@ -72,7 +76,7 @@ public class MsgActivity extends AppCompatActivity {
                 }
 
                 result = result.replace(p.Ref, String.format(ImgRaw,
-                        ps.first, ps.second, ps.first, API.PicURL(p.Pid), Des));
+                        ps.first, ps.second, ps.first, p.Url, Des));
             }
         }
 

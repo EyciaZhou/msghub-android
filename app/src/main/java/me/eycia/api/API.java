@@ -1,5 +1,6 @@
-package me.eycia.msghub_android;
+package me.eycia.api;
 
+import android.util.Log;
 import android.util.Pair;
 
 import org.json.JSONArray;
@@ -15,10 +16,9 @@ import me.eycia.http;
  * Created by eycia on 2/27/16.
  */
 public class API {
-    //static final String ADDR = "http://msghub.eycia.me/";
-    static final String ADDR = "http://msghub.eycia.me:4000/";
-    static final String ADDR_MSGS = "http://msghub.eycia.me:4000/msgs/";
-    static final String ADDR_PIC = "http://msghub.eycia.me:4000/pic/";
+    static final String ADDR_MSGS = "https://msghub.eycia.me/msgs/";
+    public static final int VIEW_NORMAL = 1;
+    public static final int VIEW_PICTURE = 2;
 
     static Pattern pattern = Pattern.compile("(\\d+)\\*(\\d+)");
 
@@ -31,14 +31,12 @@ public class API {
         Matcher matcher = pattern.matcher(Pixes);
         matcher.find();
 
+        Log.d("msghub", Pixes);
+
         int ws = Integer.parseInt(matcher.group(1));
         int hs = Integer.parseInt(matcher.group(2));
 
         return new Pair<>(ws, hs);
-    }
-
-    static public String PicURL(String Id) {
-        return ADDR_PIC + Id;
     }
 
     static private Msg parseMsg(JSONObject jo) throws JSONException {
@@ -57,18 +55,39 @@ public class API {
         return new ChanInfo(id, title, lstModify);
     }
 
-    static private MsgInfo parseMsgInfo(JSONObject jo) throws JSONException {
-        String CoverImgId = "";
+    static private MsgLine parseMsgInfo(JSONObject jo) throws JSONException {
+        String CoverImg = "";
         String Topic = "";
-        if (!jo.isNull("CoverImgId")) {
-            CoverImgId = jo.getString("CoverImgId");
+        String AuthorId = "";
+        String AuthorCoverImg = "";
+        String AuthorName = "";
+        String[] NinePics = new String[0];
+        if (!jo.isNull("CoverImg")) {
+            CoverImg = jo.getString("CoverImg");
         }
         if (!jo.isNull("Topic")) {
             Topic = jo.getString("Topic");
         }
-        return new MsgInfo(jo.getString("Id"), jo.getLong("SnapTime"), jo.getLong("PubTime"), jo.getString("SourceURL"),
-                jo.getString("Title"), jo.getString("SubTitle"), CoverImgId, jo.getInt("ViewType"), jo.getString("Frm"),
-                jo.getString("Tag"), Topic);
+        if (!jo.isNull("AuthorId")) {
+            AuthorId = jo.getString("AuthorId");
+        }
+        if (!jo.isNull("AuthorCoverImg")) {
+            AuthorCoverImg = jo.getString("AuthorCoverImg");
+        }
+        if (!jo.isNull("AuthorName")) {
+            AuthorName = jo.getString("AuthorName");
+        }
+        if (!jo.isNull("Pics")) {
+            JSONArray ja = jo.getJSONArray("Pics");
+
+            NinePics = new String[ja.length()];
+            for (int i = 0; i < ja.length(); i++) {
+                NinePics[i] = ja.getString(i) + "-small";
+            }
+        }
+        return new MsgLine(AuthorCoverImg, AuthorId, AuthorName, CoverImg, jo.getString("Id"),
+                jo.getLong("PubTime"), jo.getLong("SnapTime"), jo.getString("SourceURL"),
+                jo.getString("SubTitle"), jo.getString("Tag"), jo.getString("Title"), Topic, jo.getInt("ViewType"), NinePics);
     }
 
     static public Msg Msg(String Id) throws Exception{
@@ -97,7 +116,7 @@ public class API {
         }).start();
     }
 
-    static public MsgInfo[] Page(String ChanId, int Limit, String lstId, long lstti) throws Exception{
+    static public MsgLine[] Page(String ChanId, int Limit, String lstId, long lstti) throws Exception{
         final String PATH = "page";
 
         String url;
@@ -116,7 +135,7 @@ public class API {
 
         JSONArray infoArray = jo.getJSONArray("data");
 
-        MsgInfo[] result = new MsgInfo[infoArray.length()];
+        MsgLine[] result = new MsgLine[infoArray.length()];
 
         for (int i = 0; i < infoArray.length(); i++) {
             result[i] = parseMsgInfo(infoArray.getJSONObject(i));
@@ -130,8 +149,8 @@ public class API {
             @Override
             public void run() {
                 try {
-                    MsgInfo[] msgInfo = Page(ChanId, Limit, LstId, lstti);
-                    callback.Succ(msgInfo);
+                    MsgBase[] msgBase = Page(ChanId, Limit, LstId, lstti);
+                    callback.Succ(msgBase);
                 } catch (Exception e) {
                     callback.Err(e);
                 }
