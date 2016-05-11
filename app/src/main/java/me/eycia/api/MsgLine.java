@@ -3,15 +3,18 @@ package me.eycia.api;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/**
- * Created by eycia on 16/5/9.
- */
 public class MsgLine extends MsgBase implements Parcelable, Comparable<MsgLine> {
     public String[] Pics;
 
     public MsgLine(String authorCoverImg, String authorId, String authorName, String coverImg, String id, long pubTime, long snapTime, String sourceURL, String subTitle, String tag, String title, String topic, int viewType, String[] pics) {
         super(authorCoverImg, authorId, authorName, coverImg, id, pubTime, snapTime, sourceURL, subTitle, tag, title, topic, viewType);
         this.Pics = pics;
+    }
+
+    public MsgLine(MsgBase mb, String[] pics) {
+        super(mb.AuthorCoverImg, mb.AuthorId, mb.AuthorName, mb.CoverImg, mb.Id, mb.PubTime,
+                mb.SnapTime, mb.SourceURL, mb.SubTitle, mb.Tag, mb.Title, mb.Topic, mb.ViewType);
+        Pics = pics;
     }
 
     public MsgLine(Parcel in, String[] pics) {

@@ -1,36 +1,20 @@
 package me.eycia.msghub_android;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
-import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.util.Pair;
-import android.view.ViewTreeObserver;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.drawee.view.SimpleDraweeView;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import me.eycia.api.API;
 import me.eycia.api.Msg;
 import me.eycia.api.PicRef;
 
-public class MsgActivity extends AppCompatActivity {
-
+public class MoreInfoActivity extends AppCompatActivity {
+    private MoreInfoData mMoreInfoData;
     private WebView webView;
-    private Msg msg;
 
     private String ImgRaw = "<center>\n" +
             "<div style=\"width:%dpx\">\n" +
@@ -53,22 +37,22 @@ public class MsgActivity extends AppCompatActivity {
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        if (msg != null) {
-            Update();
+        if (mMoreInfoData.GetMsg() != null) {
+            NotifyDateUpdate();
         }
     }
 
     private String GenBody() {
+        Msg msg = mMoreInfoData.GetMsg();
+        Log.d("msghub", msg.Body);
+
         String result = msg.Body;
         if (msg.PicRefs == null) {
             return result;
         }
         for (PicRef p: msg.PicRefs) {
-            if (p.Ref != null && p.Pixes != null) {
-                Pair<Integer, Integer> ps = Scale(API.ParsePixes(p.Pixes));
-                //Log.i("msghub", p.Pixes);
-                //Log.i("msghub", String.valueOf(ps.first));
-                //Log.i("msghub", String.valueOf(ps.second));
+            if (p.Ref != null) {
+                Pair<Integer, Integer> ps = Scale(new Pair<>(p.px, p.py));
 
                 String Des = "";
                 if (p.Description != null) {
@@ -83,13 +67,18 @@ public class MsgActivity extends AppCompatActivity {
         return result;
     }
 
-    private void Update() {
+    public void NotifyDateUpdate() {
         webView.loadDataWithBaseURL("", GenBody(), null, "utf-8", "");
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Intent intent = getIntent();
+        String msgid = intent.getStringExtra("msgid");
+
+        mMoreInfoData = new MoreInfoData(this, msgid, savedInstanceState);
 
         setContentView(R.layout.activity_msg);
 
@@ -103,42 +92,16 @@ public class MsgActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        Intent intent = getIntent();
-        String msgid = intent.getStringExtra("msgid");
-
         if (savedInstanceState == null) {
-
-            API.MsgCallback(msgid, new API.Callback() {
-                @Override
-                public void Succ(final Object o) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            msg = (Msg) o;
-                            Update();
-                        }
-                    });
-                }
-
-                @Override
-                public void Err(final Exception e) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-            });
-
+            mMoreInfoData.UpdateMsg();
         } else {
-            msg = savedInstanceState.getParcelable("msg");
+            NotifyDateUpdate();
         }
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putParcelable("msg", msg);
+        mMoreInfoData.onSaveInstanceState(savedInstanceState);
     }
 }

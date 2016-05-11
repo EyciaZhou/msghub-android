@@ -1,9 +1,5 @@
 package me.eycia.msghub_android;
 
-/**
- * Created by eycia on 2/28/16.
- */
-
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,7 +7,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,184 +15,54 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import org.ocpsoft.prettytime.PrettyTime;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Vector;
 
 import me.eycia.api.API;
 import me.eycia.api.ChanInfo;
-import me.eycia.api.MsgBase;
 import me.eycia.api.MsgLine;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class Chan extends Fragment {
-    private ChanInfo chanInfo;
-    private MsgLine[] msgLines;
-
+public class ChanFragment extends Fragment {
     private ListView lv;
     private SwipeRefreshLayout mrl;
+    private ChanFragmentData mChanFragmentData;
 
-    private boolean noMore;
+    private ChanInfo chanInfo;
 
     /**
      * Returns a new instance of this fragment for the given section
      * number.
      */
-    public static Chan newInstance(ChanInfo chanInfo) {
-        Chan fragment = new Chan();
-        Bundle mBundle = new Bundle();
-        mBundle.putParcelable("chanInfo", chanInfo);
-
-        fragment.msgLines = new MsgLine[0];
-        fragment.noMore = false;
-
-        fragment.setArguments(mBundle);
+    public static ChanFragment newInstance(ChanInfo chanInfo) {
+        ChanFragment fragment = new ChanFragment();
+        fragment.chanInfo = chanInfo;
         return fragment;
     }
 
-    public Chan() {
+    public ChanFragment() {
     }
 
-    private void getNew() {
-        API.PageCallback(chanInfo.Id, 20, "0", -1, new API.Callback() {
-
-            @Override
-            public void Succ(final Object o) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mrl.setRefreshing(false);
-
-                        if (o != null) {
-                            MsgLine[] msgs = (MsgLine[]) (o);
-
-                            Vector<MsgLine> forSort = new Vector<MsgLine>();
-                            for (int i = 0; i < msgs.length; i++) {
-                                forSort.add(msgs[i]);
-                            }
-                            Collections.sort(forSort);
-
-                            msgLines = forSort.toArray(new MsgLine[forSort.size()]);
-
-                            Update();
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void Err(final Exception e) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mrl.setRefreshing(false);
-                        e.printStackTrace();
-                        Toast.makeText(getActivity().getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-        });
-    }
-
-    private void getMore(MsgBase lst) {
-        API.PageCallback(chanInfo.Id, 20, lst.Id, lst.SnapTime, new API.Callback() {
-
-            @Override
-            public void Succ(final Object o) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mrl.setRefreshing(false);
-
-                        if (o != null) {
-                            MsgLine[] msgs = (MsgLine[])(o);
-
-                            if (msgs == null || msgs.length == 0) {
-                                noMore = true;
-                                Toast.makeText(getActivity().getApplicationContext(), "No More", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-
-                            if (msgLines == null || msgLines.length == 0) {
-                                msgLines = msgs;
-                                Update();
-                                return;
-                            }
-
-                            Set<String> DupRemove = new HashSet<String>();
-
-                            Vector<MsgLine> msgsFinal = new Vector<>();
-
-                            for (int i = 0; i < msgs.length; i++) {
-                                msgsFinal.add(msgs[i]);
-                                DupRemove.add(msgs[i].Id);
-                            }
-
-                            for (int i = 0; i < msgLines.length; i++) {
-                                if (!DupRemove.contains(msgLines[i].Id)) {
-                                    msgsFinal.add(msgLines[i]);
-                                    DupRemove.add(msgLines[i].Id);
-                                }
-                            }
-
-                            Collections.sort(msgsFinal);
-                            msgLines = msgsFinal.toArray(new MsgLine[msgsFinal.size()]);
-
-                            Update();
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void Err(final Exception e) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mrl.setRefreshing(false);
-                        e.printStackTrace();
-                        Toast.makeText(getActivity().getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-        });
-    }
-
-    public void Update() {
-        ArrayList<HashMap<String, String>> ls = new ArrayList<HashMap<String, String>>();
-        for (int i = 0; i < this.msgLines.length; i++) {
-            HashMap<String, String> map = new HashMap<String, String>();
-            map.put("ItemTitle", this.msgLines[i].Title);
-            map.put("ItemText", this.msgLines[i].SubTitle);
-            map.put("ListCover", this.msgLines[i].CoverImg);
-            ls.add(map);
-        }
+    public void UpdateView() {
+        mrl.setRefreshing(false);
 
         final int cachePos = lv.getFirstVisiblePosition();
 
         lv.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
-                return msgLines.length;
+                return mChanFragmentData.GetCount();
             }
 
             @Override
             public Object getItem(int position) {
-                return msgLines[position];
+                return mChanFragmentData.GetItem(position);
             }
 
             @Override
@@ -235,11 +100,11 @@ public class Chan extends Fragment {
 
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
-                MsgLine msgLine = (MsgLine)getItem(position);
+                MsgLine msgLine = (MsgLine) getItem(position);
                 NormalViewHolder nViewHolder = null;
                 PictureViewHolder pViewHolder = null;
 
-                if (convertView == null || ((BaseViewHolder)convertView.getTag()).ViewType != msgLine.ViewType) {
+                if (convertView == null || ((BaseViewHolder) convertView.getTag()).ViewType != msgLine.ViewType) {
                     LayoutInflater inflater = LayoutInflater.from(getContext());
 
                     if (msgLine.ViewType == API.VIEW_NORMAL) {
@@ -260,21 +125,21 @@ public class Chan extends Fragment {
                         pViewHolder.ItemTime = (TextView) convertView.findViewById(R.id.ItemTime);
                         pViewHolder.ItemText = (TextView) convertView.findViewById(R.id.ItemText);
                         pViewHolder.ListCover = (SimpleDraweeView) convertView.findViewById(R.id.ListCover);
-                        pViewHolder.Pics[0] = (SimpleDraweeView)convertView.findViewById(R.id.PIC11);
-                        pViewHolder.Pics[1] = (SimpleDraweeView)convertView.findViewById(R.id.PIC12);
-                        pViewHolder.Pics[2] = (SimpleDraweeView)convertView.findViewById(R.id.PIC13);
-                        pViewHolder.Pics[3] = (SimpleDraweeView)convertView.findViewById(R.id.PIC21);
-                        pViewHolder.Pics[4] = (SimpleDraweeView)convertView.findViewById(R.id.PIC22);
-                        pViewHolder.Pics[5] = (SimpleDraweeView)convertView.findViewById(R.id.PIC23);
-                        pViewHolder.Pics[6] = (SimpleDraweeView)convertView.findViewById(R.id.PIC31);
-                        pViewHolder.Pics[7] = (SimpleDraweeView)convertView.findViewById(R.id.PIC32);
-                        pViewHolder.Pics[8] = (SimpleDraweeView)convertView.findViewById(R.id.PIC33);
+                        pViewHolder.Pics[0] = (SimpleDraweeView) convertView.findViewById(R.id.PIC11);
+                        pViewHolder.Pics[1] = (SimpleDraweeView) convertView.findViewById(R.id.PIC12);
+                        pViewHolder.Pics[2] = (SimpleDraweeView) convertView.findViewById(R.id.PIC13);
+                        pViewHolder.Pics[3] = (SimpleDraweeView) convertView.findViewById(R.id.PIC21);
+                        pViewHolder.Pics[4] = (SimpleDraweeView) convertView.findViewById(R.id.PIC22);
+                        pViewHolder.Pics[5] = (SimpleDraweeView) convertView.findViewById(R.id.PIC23);
+                        pViewHolder.Pics[6] = (SimpleDraweeView) convertView.findViewById(R.id.PIC31);
+                        pViewHolder.Pics[7] = (SimpleDraweeView) convertView.findViewById(R.id.PIC32);
+                        pViewHolder.Pics[8] = (SimpleDraweeView) convertView.findViewById(R.id.PIC33);
                     }
                 } else {
                     if (msgLine.ViewType == API.VIEW_NORMAL) {
-                        nViewHolder = (NormalViewHolder)convertView.getTag();
+                        nViewHolder = (NormalViewHolder) convertView.getTag();
                     } else if (msgLine.ViewType == API.VIEW_PICTURE) {
-                        pViewHolder = (PictureViewHolder)convertView.getTag();
+                        pViewHolder = (PictureViewHolder) convertView.getTag();
                     }
                 }
 
@@ -298,7 +163,7 @@ public class Chan extends Fragment {
                     pViewHolder.ItemTime.setText(new PrettyTime().format(new Date(msgLine.PubTime * 1000)));
                     pViewHolder.ListCover.setImageURI(Uri.parse(msgLine.AuthorCoverImg));
 
-                    if ( msgLine.Pics == null) {
+                    if (msgLine.Pics == null) {
                         msgLine.Pics = new String[0];
                     }
 
@@ -314,7 +179,7 @@ public class Chan extends Fragment {
                         ViewGroup.LayoutParams lp = pViewHolder.Pics[i].getLayoutParams();
                         lp.height = lp.width = 0;
                         pViewHolder.Pics[i].setLayoutParams(lp);
-                        pViewHolder.Pics[i].setImageURI(Uri.parse("http://7xtaud.com2.z0.glb.qiniucdn.com/8767"));
+                        pViewHolder.Pics[i].setImageURI(Uri.EMPTY);
                     }
 
                     convertView.setTag(pViewHolder);
@@ -325,32 +190,34 @@ public class Chan extends Fragment {
         });
 
         lv.setSelectionFromTop(cachePos, 0);
-
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putParcelableArray("msgInfo", msgLines);
-        savedInstanceState.putBoolean("noMore", noMore);
+        savedInstanceState.putParcelable("chaninfo", chanInfo);
+        mChanFragmentData.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        this.chanInfo = getArguments().getParcelable("chanInfo");
+        if (savedInstanceState != null) {
+            chanInfo = (ChanInfo) savedInstanceState.get("chaninfo");
+        }
+
+        mChanFragmentData = new ChanFragmentData(this, chanInfo, savedInstanceState);
 
         View rootView = inflater.inflate(R.layout.fragment_msgs_display, container, false);
 
         mrl = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeRefresh);
         lv = (ListView) rootView.findViewById(R.id.listView2);
 
-
         SwipeRefreshLayout.OnRefreshListener refreshListener = new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                getNew();
+                mChanFragmentData.GetNewer();
             }
         };
 
@@ -360,20 +227,17 @@ public class Chan extends Fragment {
             mrl.setRefreshing(true);
             refreshListener.onRefresh();
         } else {
-            this.msgLines = (MsgLine[])savedInstanceState.getParcelableArray("msgInfo");
-            this.noMore = savedInstanceState.getBoolean("noMore");
-            Update();
+            UpdateView();
         }
 
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.i("msghub", String.valueOf(id));
                 if (id < 0) {
                     return;
                 }
-                Intent intent = new Intent(getActivity(), MsgActivity.class);
-                intent.putExtra("msgid", msgLines[((int) id)].Id);
+                Intent intent = new Intent(getActivity(), MoreInfoActivity.class);
+                intent.putExtra("msgid", mChanFragmentData.GetItem((int) id).Id);
                 getActivity().startActivity(intent);
             }
         });
@@ -389,15 +253,9 @@ public class Chan extends Fragment {
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 int lastItem = firstVisibleItem + visibleItemCount;
                 if (lastItem >= totalItemCount) {
-                    View lastItemView = view.getChildAt(view.getChildCount()-1);
+                    View lastItemView = view.getChildAt(view.getChildCount() - 1);
                     if (lastItemView != null && view.getBottom() >= lastItemView.getBottom()) {
-                        if (!noMore) {
-                            //TODO: show more view
-                            if (msgLines.length > 0) {
-                                getMore(msgLines[msgLines.length - 1]);
-                            }
-
-                        }
+                        mChanFragmentData.GetOlder();
                     }
                 }
             }
