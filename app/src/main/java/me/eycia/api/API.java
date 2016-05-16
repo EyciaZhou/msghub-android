@@ -32,17 +32,9 @@ public class API {
                     if (v == null) {
                         throw new Exception("result is nll");
                     } else {
-                        //callOnUI(callback.GetActivity(), new Runnable() {
-                        //    @Override
-                        //    public void run() {
                         callback.Successful(v);
-                        //    }
-                        //});
                     }
                 } catch (final Exception e) {
-                    //callOnUI(callback.GetActivity(), new Runnable() {
-                    //    @Override
-                    //    public void run() {
                     e.printStackTrace();
 
                     Looper.prepare();
@@ -50,8 +42,6 @@ public class API {
                     Looper.loop();
 
                     callback.Error(e);
-                    //    }
-                    //});
                 }
             }
         }).start();
@@ -110,7 +100,7 @@ public class API {
             JSONArray ja = jo.getJSONArray("Pics");
             NinePics = new String[ja.length()];
             for (int i = 0; i < ja.length(); i++) {
-                NinePics[i] = ja.getString(i) + "-small";
+                NinePics[i] = ja.getString(i);
             }
         }
         return new MsgLine(parseMsgBaseFromJson(jo), NinePics);
@@ -126,7 +116,7 @@ public class API {
         String AuthorId = "";
         String AuthorCoverImg = "";
         String AuthorName = "";
-        if (!jo.isNull("CoverImg")) CoverImg = jo.getString("CoverImg") + "-small";
+        if (!jo.isNull("CoverImg")) CoverImg = jo.getString("CoverImg");
         if (!jo.isNull("Topic")) Topic = jo.getString("Topic");
         if (!jo.isNull("AuthorId")) AuthorId = jo.getString("AuthorId");
         if (!jo.isNull("AuthorCoverImg"))

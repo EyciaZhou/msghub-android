@@ -7,6 +7,7 @@ import android.support.v7.widget.Toolbar;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 
+import me.eycia.Notifier;
 import me.eycia.view.SlidingTabLayout;
 
 public class MainActivity extends AppCompatActivity {
@@ -27,7 +28,18 @@ public class MainActivity extends AppCompatActivity {
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
 
-        mMainActivityChannelsAdapter = new MainActivityChannelsAdapter(getSupportFragmentManager(), this, savedInstanceState);
+        mMainActivityChannelsAdapter = new MainActivityChannelsAdapter(getSupportFragmentManager(), savedInstanceState);
+        mMainActivityChannelsAdapter.ChansNotifier.addOnDataChangeListener(new Notifier.OnDataChangeListener() {
+            @Override
+            public void OnDataChange() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSlidingTabLayout.setViewPager(mViewPager);
+                    }
+                });
+            }
+        });
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
@@ -42,11 +54,6 @@ public class MainActivity extends AppCompatActivity {
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         mMainActivityChannelsAdapter.onSaveInstanceState(savedInstanceState);
-    }
-
-    public void UpdateUI() {
-        mMainActivityChannelsAdapter.notifyDataSetChanged();
-        mSlidingTabLayout.setViewPager(mViewPager);
     }
 }
 

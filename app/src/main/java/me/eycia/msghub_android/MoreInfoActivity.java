@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.util.Pair;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -13,18 +12,8 @@ import me.eycia.api.Msg;
 import me.eycia.api.PicRef;
 
 public class MoreInfoActivity extends AppCompatActivity {
-    private MoreInfoData mMoreInfoData;
+    private Msg m;
     private WebView webView;
-
-    private String ImgRaw = "<center>\n" +
-            "<div style=\"width:%dpx\">\n" +
-            "<img height=\"%dpx\" width=\"%dpx\" src=\"%s\" border=\"2\">\n" +
-            "<div style=\"text-align:left\">\n" +
-            "%s\n" +
-            "</div>\n" +
-            "</div>\n" +
-            "</center>" +
-            "<p></p>";
 
     private Pair<Integer, Integer> Scale(Pair<Integer, Integer> ps) {
         float width = webView.getWidth() / webView.getScale() - 50;
@@ -37,21 +26,28 @@ public class MoreInfoActivity extends AppCompatActivity {
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        if (mMoreInfoData.GetMsg() != null) {
-            NotifyDateUpdate();
-        }
+        NotifyDateUpdate();
     }
 
     private String GenBody() {
-        Msg msg = mMoreInfoData.GetMsg();
-        Log.d("msghub", msg.Body);
+        String ImgRaw = "<center>\n" +
+                "<div style=\"width:%dpx\">\n" +
+                "<img height=\"%dpx\" width=\"%dpx\" src=\"%s\" border=\"2\">\n" +
+                "<div style=\"text-align:left\">\n" +
+                "%s\n" +
+                "</div>\n" +
+                "</div>\n" +
+                "</center>" +
+                "<p></p>";
+
+        Msg msg = m;
 
         String result = msg.Body;
         if (msg.PicRefs == null) {
             return result;
         }
-        for (PicRef p: msg.PicRefs) {
-            if (p.Ref != null) {
+        for (PicRef p : msg.PicRefs) {
+            if (p.Ref != null && !p.Ref.equals("")) {
                 Pair<Integer, Integer> ps = Scale(new Pair<>(p.px, p.py));
 
                 String Des = "";
@@ -68,33 +64,34 @@ public class MoreInfoActivity extends AppCompatActivity {
     }
 
     public void NotifyDateUpdate() {
-        webView.loadDataWithBaseURL("", GenBody(), null, "utf-8", "");
+        if (m != null) {
+            webView.loadDataWithBaseURL("", GenBody(), null, "utf-8", "");
+        }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Intent intent = getIntent();
-        String msgid = intent.getStringExtra("msgid");
-
-        mMoreInfoData = new MoreInfoData(this, msgid, savedInstanceState);
-
         setContentView(R.layout.activity_msg);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar2);
         setSupportActionBar(toolbar);
 
         webView = (WebView) findViewById(R.id.webView);
-
         webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        if (savedInstanceState == null) {
-            mMoreInfoData.UpdateMsg();
+
+        if (savedInstanceState != null) {
+            m = savedInstanceState.getParcelable("m");
         } else {
+            Intent intent = getIntent();
+            m = intent.getParcelableExtra("m");
+        }
+
+        if (m != null) {
             NotifyDateUpdate();
         }
     }
@@ -102,6 +99,6 @@ public class MoreInfoActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        mMoreInfoData.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putParcelable("m", m);
     }
 }

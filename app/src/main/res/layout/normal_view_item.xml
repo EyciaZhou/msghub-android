@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
 
-    android:id="@+id/MyListItem"
+    android:id="@+id/normal_view"
     android:paddingBottom="3dip"
     android:paddingLeft="3dip">
 

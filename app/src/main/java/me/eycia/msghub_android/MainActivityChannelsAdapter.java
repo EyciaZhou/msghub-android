@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+import me.eycia.Notifier;
 import me.eycia.api.API;
 import me.eycia.api.ChanInfo;
 
@@ -14,26 +15,24 @@ import me.eycia.api.ChanInfo;
  * Created by eycia on 2/27/16.
  */
 public class MainActivityChannelsAdapter extends FragmentPagerAdapter {
-    private MainActivity activity;
-
     private ChanInfo[] chans;
 
     private Handler uiHandler = new Handler(Looper.getMainLooper());
     private Handler cronHandler = new Handler();
 
-    protected void onCreate(Bundle savedInstanceState) {
-
-    }
+    public Notifier ChansNotifier = new Notifier();
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putParcelableArray("chanInfos", chans);
     }
 
-    private void NotifyUI() {
+    private void ChangeChansData(final ChanInfo[] cs) {
         uiHandler.post(new Runnable() {
             @Override
             public void run() {
-                activity.UpdateUI();
+                chans = cs;
+                notifyDataSetChanged();
+                ChansNotifier.ChangeData();
             }
         });
     }
@@ -42,8 +41,7 @@ public class MainActivityChannelsAdapter extends FragmentPagerAdapter {
         API.ChansInfoCallback(new API.Callback() {
             @Override
             public void Successful(Object o) {
-                chans = (ChanInfo[]) (o);
-                NotifyUI();
+                ChangeChansData((ChanInfo[]) (o));
             }
 
             @Override
@@ -60,17 +58,15 @@ public class MainActivityChannelsAdapter extends FragmentPagerAdapter {
         }
     };
 
-    public MainActivityChannelsAdapter(FragmentManager fm, MainActivity activity, Bundle savedInstanceState) {
+    public MainActivityChannelsAdapter(FragmentManager fm, Bundle savedInstanceState) {
         super(fm);
-        this.activity = activity;
         chans = new ChanInfo[0];
         cronHandler.post(cronUpdateChansInfo);
 
         if (savedInstanceState == null) {
             CallAPI();
         } else {
-            chans = (ChanInfo[]) savedInstanceState.getParcelableArray("chanInfos");
-            NotifyUI();
+            ChangeChansData((ChanInfo[]) savedInstanceState.getParcelableArray("chanInfos"));
         }
     }
 

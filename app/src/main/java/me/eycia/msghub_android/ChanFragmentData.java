@@ -1,8 +1,6 @@
 package me.eycia.msghub_android;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.widget.Toast;
 
 import java.util.Arrays;
@@ -11,6 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
+import me.eycia.Notifier;
 import me.eycia.api.API;
 import me.eycia.api.ChanInfo;
 import me.eycia.api.MsgLine;
@@ -19,24 +18,13 @@ import me.eycia.api.MsgLine;
  * Created by eycia on 16/5/10.
  */
 public class ChanFragmentData {
-    private ChanFragment fragment;
     private MsgLine[] msgLines = new MsgLine[0];
     private ChanInfo chanInfo;
     private boolean noMore;
 
-    private Handler uiHandler = new Handler(Looper.getMainLooper());
+    public Notifier MsgLinesNotifier = new Notifier();
 
-    private void NotifyUI() {
-        uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                fragment.UpdateView();
-            }
-        });
-    }
-
-    public ChanFragmentData(ChanFragment chanFragment, ChanInfo chanInfo, Bundle savedInstanceState) {
-        this.fragment = chanFragment;
+    public ChanFragmentData(ChanInfo chanInfo, Bundle savedInstanceState) {
         this.chanInfo = chanInfo;
         if (savedInstanceState != null) {
             this.msgLines = (MsgLine[]) savedInstanceState.getParcelableArray("msgLines");
@@ -69,12 +57,12 @@ public class ChanFragmentData {
                     Arrays.sort(msgs);
                     msgLines = msgs;
                 }
-                NotifyUI();
+                MsgLinesNotifier.ChangeData();
             }
 
             @Override
             public void Error(final Exception e) {
-                NotifyUI();
+                MsgLinesNotifier.ChangeData();
             }
         });
     }
@@ -98,7 +86,7 @@ public class ChanFragmentData {
 
                             if (msgLines == null || msgLines.length == 0) {
                                 msgLines = msgs;
-                                fragment.UpdateView();
+                                MsgLinesNotifier.ChangeData();
                                 return;
                             }
 
@@ -120,8 +108,7 @@ public class ChanFragmentData {
 
                             Collections.sort(msgsFinal);
                             msgLines = msgsFinal.toArray(new MsgLine[msgsFinal.size()]);
-
-                            NotifyUI();
+                            MsgLinesNotifier.ChangeData();
                         }
                     }
 
