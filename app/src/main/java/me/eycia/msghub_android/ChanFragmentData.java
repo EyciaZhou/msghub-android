@@ -1,6 +1,7 @@
 package me.eycia.msghub_android;
 
 import android.os.Bundle;
+import android.os.Looper;
 import android.widget.Toast;
 
 import java.util.Arrays;
@@ -80,6 +81,7 @@ public class ChanFragmentData {
 
                             if (msgs.length == 0) {
                                 noMore = true;
+                                Looper.prepare();
                                 Toast.makeText(MyApplication.getAppContext(), "No More", Toast.LENGTH_SHORT).show();
                                 return;
                             }

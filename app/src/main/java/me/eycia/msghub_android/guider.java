@@ -34,6 +34,7 @@ public class guider extends AppCompatActivity {
                             intent_to = new Intent(guider.this, MoreInfoActivity.class);
                         } else if (m.ViewType == API.VIEW_PICTURE) {
                             intent_to = new Intent(guider.this, pictures.class);
+                            intent_to.putExtra("clicked_pic", getIntent().getIntExtra("clicked_pic", 0));
                         }
                         intent_to.putExtra("m", m);
                         guider.this.startActivity(intent_to);

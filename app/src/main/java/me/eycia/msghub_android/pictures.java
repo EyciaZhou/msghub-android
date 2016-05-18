@@ -1,32 +1,23 @@
 package me.eycia.msghub_android;
 
 import android.content.Intent;
-import android.graphics.drawable.Animatable;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.TextView;
-
-import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.drawee.controller.BaseControllerListener;
-import com.facebook.drawee.view.SimpleDraweeView;
-import com.facebook.imagepipeline.image.ImageInfo;
 
 import me.eycia.api.Msg;
 import me.eycia.api.PicRef;
-import me.eycia.views.PicScaler;
+import me.eycia.picScalerView.PicScalerView;
 
 public class pictures extends AppCompatActivity {
-    private Msg m;
+    private Msg mMsg;
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
@@ -38,25 +29,34 @@ public class pictures extends AppCompatActivity {
         setContentView(R.layout.activity_pictures);
 
         if (savedInstanceState != null) {
-            m = savedInstanceState.getParcelable("m");
+            mMsg = savedInstanceState.getParcelable("m");
         } else {
             Intent intent = getIntent();
-            m = intent.getParcelableExtra("m");
+            mMsg = intent.getParcelableExtra("m");
         }
 
-        if (m != null) {
-            mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), m.PicRefs);
+        if (mMsg != null) {
+            mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), mMsg.PicRefs);
         }
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+
+        if (savedInstanceState == null) {
+            int firstShowPic = getIntent().getIntExtra("clicked_pic", 0);
+            if (firstShowPic >= mMsg.PicRefs.length) {
+                firstShowPic = 0;
+            }
+
+            mViewPager.setCurrentItem(firstShowPic);
+        }
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putParcelable("m", m);
+        savedInstanceState.putParcelable("m", mMsg);
     }
 
     public static class PlaceholderFragment extends Fragment {
@@ -83,42 +83,8 @@ public class pictures extends AppCompatActivity {
 
             PicRef pic = getArguments().getParcelable("info");
 
-            final FrameLayout fl = (FrameLayout) rootView.findViewById(R.id.contain_view);
-            fl.setOnClickListener(null);
-
-            final SimpleDraweeView picView = (SimpleDraweeView) rootView.findViewById(R.id.view);
-            picView.setController(Fresco.newDraweeControllerBuilder().setControllerListener(new BaseControllerListener<ImageInfo>() {
-                @Override
-                public void onFinalImageSet(
-                        String id,
-                        @Nullable ImageInfo imageInfo,
-                        @Nullable Animatable anim) {
-                    if (imageInfo == null) {
-                        return;
-                    }
-
-                    Log.d("msghub", "onFinalImageSet");
-                    Log.d("msghub", imageInfo.getWidth() + "");
-                    Log.d("msghub", imageInfo.getHeight() + "");
-
-                    ViewGroup.LayoutParams lp = picView.getLayoutParams();
-                    lp.width = imageInfo.getWidth();
-                    lp.height = imageInfo.getHeight();
-                    picView.setLayoutParams(lp);
-
-                    new PicScaler(fl, picView);
-                }
-
-                @Override
-                public void onIntermediateImageSet(String id, @Nullable ImageInfo imageInfo) {
-
-                }
-
-                @Override
-                public void onFailure(String id, Throwable throwable) {
-
-                }
-            }).setUri(pic.Url).build());
+            PicScalerView picScalerView = (PicScalerView) rootView.findViewById(R.id.pic_scaler_view);
+            picScalerView.SetImgUri(pic.Url);
 
             TextView textView = (TextView) rootView.findViewById(R.id.textView);
             textView.setText(pic.Description);

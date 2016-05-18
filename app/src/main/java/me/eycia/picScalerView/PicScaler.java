@@ -1,13 +1,12 @@
-package me.eycia.views;
+package me.eycia.picScalerView;
 
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-/**
- * Created by eycia on 16/5/16.
- */
+import com.facebook.imagepipeline.image.ImageInfo;
+
 public class PicScaler implements View.OnTouchListener {
     int fgs = 0;
     double startDist = 0;
@@ -21,10 +20,26 @@ public class PicScaler implements View.OnTouchListener {
 
     View Layout, ToScale;
 
-    public PicScaler(View Layout, View ToScale) {
+    public PicScaler(View Layout, View ToScale, ImageInfo imageInfo) {
         Layout.setOnTouchListener(this);
         this.Layout = Layout;
         this.ToScale = ToScale;
+
+        ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) ToScale.getLayoutParams();
+        lp.width = imageInfo.getWidth();
+        lp.height = imageInfo.getHeight();
+
+        lp.width = Layout.getWidth();
+        lp.height = Layout.getWidth() * imageInfo.getHeight() / imageInfo.getWidth();
+
+        if (((lp.width + 0.0) / lp.height) > ((Layout.getWidth() + 0.0) / Layout.getHeight())) {
+            lp.topMargin = (Layout.getHeight() - lp.height) / 2;
+            lp.leftMargin = 0;
+        } else {
+            lp.topMargin = lp.leftMargin = 0;
+        }
+
+        ToScale.setLayoutParams(lp);
     }
 
     double getDist(MotionEvent event) {
@@ -62,18 +77,6 @@ public class PicScaler implements View.OnTouchListener {
                 fgs -= 1;
                 if (fgs < 2) {
                     method = 0;
-                    if (ToScale.getHeight() < Layout.getHeight() || ToScale.getWidth() < Layout.getWidth()) {
-                        double rate1 = ((Layout.getHeight() + 0.0) / ToScale.getHeight());
-                        double rate2 = ((Layout.getWidth() + 0.0) / ToScale.getWidth());
-                        if (rate2 > rate1) {
-                            rate1 = rate2;
-                        }
-                        lp.height *= rate1;
-                        lp.width *= rate1;
-                        lp.topMargin = 0;
-                        lp.leftMargin = 0;
-                        ToScale.setLayoutParams(lp);
-                    }
                 }
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
@@ -126,16 +129,44 @@ public class PicScaler implements View.OnTouchListener {
                 break;
         }
 
-        if (lp.height + lp.topMargin < Layout.getHeight()) {
-            lp.topMargin = Layout.getHeight() - lp.height;
-        } else if (lp.topMargin > 0) {
-            lp.topMargin = 0;
+        if (method == 0 && lp.width < Layout.getWidth()) {
+            double rate = ((Layout.getWidth() + 0.0) / lp.width);
+
+            lp.topMargin -= lp.height * (rate - 1) / 2;
+            lp.leftMargin = 0;
+
+            lp.height *= rate;
+            lp.width *= rate;
+
+            ToScale.setLayoutParams(lp);
         }
 
-        if (lp.width + lp.leftMargin < Layout.getWidth()) {
-            lp.leftMargin = Layout.getWidth() - lp.width;
-        } else if (lp.leftMargin > 0) {
-            lp.leftMargin = 0;
+        if (lp.height > Layout.getHeight()) {
+            if (lp.height + lp.topMargin < Layout.getHeight()) {
+                lp.topMargin = Layout.getHeight() - lp.height;
+            } else if (lp.topMargin > 0) {
+                lp.topMargin = 0;
+            }
+        } else {
+            if (lp.topMargin < 0) {
+                lp.topMargin = 0;
+            } else if (lp.topMargin + lp.height > Layout.getHeight()) {
+                lp.topMargin = Layout.getHeight() - lp.height;
+            }
+        }
+
+        if (lp.width > Layout.getWidth()) {
+            if (lp.width + lp.leftMargin < Layout.getWidth()) {
+                lp.leftMargin = Layout.getWidth() - lp.width;
+            } else if (lp.leftMargin > 0) {
+                lp.leftMargin = 0;
+            }
+        } else {
+            if (lp.leftMargin < 0) {
+                lp.leftMargin = 0;
+            } else if (lp.leftMargin + lp.width > Layout.getWidth()) {
+                lp.leftMargin = Layout.getWidth() - lp.width;
+            }
         }
 
         ToScale.setLayoutParams(lp);

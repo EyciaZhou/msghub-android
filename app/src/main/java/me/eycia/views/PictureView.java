@@ -68,12 +68,12 @@ public class PictureView implements BaseView {
     }
 
     static class OnPictureClickListener implements View.OnClickListener {
-        int picid;
+        int clicked_pic;
         PictureView pictureView;
 
-        public OnPictureClickListener(int picid, PictureView pictureView) {
+        public OnPictureClickListener(int clicked_pic, PictureView pictureView) {
             this.pictureView = pictureView;
-            this.picid = picid;
+            this.clicked_pic = clicked_pic;
         }
 
         @Override
@@ -81,6 +81,7 @@ public class PictureView implements BaseView {
             if (pictureView != null) {
                 Intent intent = new Intent(pictureView.activity, guider.class);
                 intent.putExtra("mid", pictureView.msgLine.Id);
+                intent.putExtra("clicked_pic", clicked_pic);
 
                 pictureView.activity.startActivity(intent);
             }

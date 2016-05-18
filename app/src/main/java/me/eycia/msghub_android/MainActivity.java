@@ -1,9 +1,13 @@
 package me.eycia.msghub_android;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 
@@ -16,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager mViewPager;
     private SlidingTabLayout mSlidingTabLayout;
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +52,12 @@ public class MainActivity extends AppCompatActivity {
 
         mSlidingTabLayout = (SlidingTabLayout) findViewById(R.id.tabs);
         mSlidingTabLayout.setViewPager(mViewPager);
-        mSlidingTabLayout.setSelectedIndicatorColors(0xFF00BFA5);
+        mSlidingTabLayout.setSelectedIndicatorColors(getResources().getColor(R.color.colorPrimaryDark));
+
+        Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.setStatusBarColor(getResources().getColor(R.color.colorPrimary));
     }
 
     @Override
