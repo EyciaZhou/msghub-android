@@ -3,17 +3,15 @@ package me.eycia.msghub_android;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
 
 import me.eycia.Notifier;
 import me.eycia.api.API;
 import me.eycia.api.ChanInfo;
-import me.eycia.api.MsgLine;
 import me.eycia.views.BaseView;
 import me.eycia.views.NormalView;
 import me.eycia.views.PictureView;
@@ -22,9 +20,11 @@ import me.eycia.views.PictureView;
  * A placeholder fragment containing a simple view.
  */
 public class ChanFragment extends Fragment {
-    private ListView lv;
+    private RecyclerView lv;
     private SwipeRefreshLayout mrl;
     private ChanFragmentData mChanFragmentData;
+
+    LinearLayoutManager mLayoutManager;
 
     private ChanInfo chanInfo;
 
@@ -41,45 +41,37 @@ public class ChanFragment extends Fragment {
     public ChanFragment() {
     }
 
-    private BaseAdapter ListViewAdapter = new BaseAdapter() {
+    private RecyclerView.Adapter<BaseView> RecyclerViewAdapter = new RecyclerView.Adapter<BaseView>() {
         @Override
-        public int getCount() {
+        public BaseView onCreateViewHolder(ViewGroup parent, int viewType) {
+            if (viewType == API.VIEW_NORMAL) {
+                return NormalView.GetView(getContext(), parent, getActivity());
+            } else if (viewType == API.VIEW_PICTURE) {
+                return PictureView.GetView(getContext(), parent, getActivity());
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        public void onBindViewHolder(BaseView holder, int position) {
+            holder.UpdateInfo(mChanFragmentData.GetItem(position));
+        }
+
+        @Override
+        public int getItemCount() {
             return mChanFragmentData.GetCount();
         }
 
         @Override
-        public Object getItem(int position) {
-            return mChanFragmentData.GetItem(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            MsgLine msgLine = (MsgLine) getItem(position);
-
-            if (convertView == null || ((BaseView) convertView.getTag()).ViewType() != msgLine.ViewType) {
-                if (msgLine.ViewType == API.VIEW_NORMAL) {
-                    convertView = NormalView.GetView(getContext(), parent, getActivity());
-                } else if (msgLine.ViewType == API.VIEW_PICTURE) {
-                    convertView = PictureView.GetView(getContext(), parent, getActivity());
-                }
-            }
-
-            if (convertView != null) {
-                ((BaseView) convertView.getTag()).UpdateInfo(msgLine);
-            }
-
-            return convertView;
+        public int getItemViewType(int position) {
+            return mChanFragmentData.GetItem(position).ViewType;
         }
     };
 
     public void UpdateView() {
         mrl.setRefreshing(false);
-        ListViewAdapter.notifyDataSetChanged();
+        RecyclerViewAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -113,9 +105,9 @@ public class ChanFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_msgs_display, container, false);
 
         mrl = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeRefresh);
-        lv = (ListView) rootView.findViewById(R.id.listView2);
+        lv = (RecyclerView) rootView.findViewById(R.id.listView2);
 
-        lv.setAdapter(ListViewAdapter);
+        lv.setAdapter(RecyclerViewAdapter);
 
         SwipeRefreshLayout.OnRefreshListener refreshListener = new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -133,22 +125,36 @@ public class ChanFragment extends Fragment {
             UpdateView();
         }
 
-        lv.setOnScrollListener(new AbsListView.OnScrollListener() {
+        lv.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-            }
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
 
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                int lastItem = firstVisibleItem + visibleItemCount;
-                if (lastItem >= totalItemCount) {
-                    View lastItemView = view.getChildAt(view.getChildCount() - 1);
-                    if (lastItemView != null && view.getBottom() >= lastItemView.getBottom()) {
+                int topRowVerticalPosition =
+                        (recyclerView == null || recyclerView.getChildCount() == 0) ? 0 : recyclerView.getChildAt(0).getTop();
+                mrl.setEnabled(topRowVerticalPosition >= 0);
+
+
+                if (dy > 0) {
+                    int visibleItemCount = recyclerView.getChildCount();
+                    int totalItemCount = mLayoutManager.getItemCount();
+                    int pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
+
+                    if ((visibleItemCount + pastVisiblesItems) >= totalItemCount) {
                         mChanFragmentData.GetOlder();
                     }
                 }
             }
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
         });
+
+        mLayoutManager = new LinearLayoutManager(getContext());
+        mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        lv.setLayoutManager(mLayoutManager);
 
         return rootView;
     }

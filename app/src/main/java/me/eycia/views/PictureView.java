@@ -23,7 +23,7 @@ import me.eycia.msghub_android.guider;
 /**
  * Created by eycia on 16/5/11.
  */
-public class PictureView implements BaseView {
+public class PictureView extends BaseView {
     TextView ItemTitle;
     TextView ItemTime;
     TextView ItemText;
@@ -34,7 +34,8 @@ public class PictureView implements BaseView {
     MsgLine msgLine;
     Activity activity;
 
-    public PictureView(Activity activity) {
+    public PictureView(Activity activity, View view) {
+        super(view);
         this.activity = activity;
     }
 
@@ -88,11 +89,12 @@ public class PictureView implements BaseView {
         }
     }
 
-    public static View GetView(Context context, ViewGroup parent, Activity activity) {
-        PictureView viewHolder = new PictureView(activity);
-
+    public static PictureView GetView(Context context, ViewGroup parent, Activity activity) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View convertView = inflater.inflate(R.layout.picture_view_item, parent, false);
+
+        PictureView viewHolder = new PictureView(activity, convertView);
+
         viewHolder.ItemTitle = (TextView) convertView.findViewById(R.id.ItemTitle);
         viewHolder.ItemTime = (TextView) convertView.findViewById(R.id.ItemTime);
         viewHolder.ItemText = (TextView) convertView.findViewById(R.id.ItemText);
@@ -117,7 +119,7 @@ public class PictureView implements BaseView {
 
         convertView.setTag(viewHolder);
 
-        return convertView;
+        return viewHolder;
     }
 
     @Override

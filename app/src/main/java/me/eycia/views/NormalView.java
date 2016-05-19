@@ -23,7 +23,7 @@ import me.eycia.msghub_android.guider;
 /**
  * Created by eycia on 16/5/11.
  */
-public class NormalView implements BaseView {
+public class NormalView extends BaseView {
     TextView ItemTitle;
     TextView ItemTime;
     TextView ItemText;
@@ -32,7 +32,8 @@ public class NormalView implements BaseView {
     MsgLine msgLine;
     Activity activity;
 
-    public NormalView(Activity activity) {
+    public NormalView(Activity activity, View view) {
+        super(view);
         this.activity = activity;
     }
 
@@ -69,11 +70,11 @@ public class NormalView implements BaseView {
         }
     }
 
-    public static View GetView(Context context, ViewGroup parent, Activity activity) {
-        NormalView viewHolder = new NormalView(activity);
-
+    public static NormalView GetView(Context context, ViewGroup parent, Activity activity) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View convertView = inflater.inflate(R.layout.normal_view_item, parent, false);
+
+        NormalView viewHolder = new NormalView(activity, convertView);
 
         viewHolder.ItemTitle = (TextView) convertView.findViewById(R.id.ItemTitle);
         viewHolder.ItemTime = (TextView) convertView.findViewById(R.id.ItemTime);
@@ -84,7 +85,7 @@ public class NormalView implements BaseView {
 
         convertView.setTag(viewHolder);
 
-        return convertView;
+        return viewHolder;
     }
 
 }

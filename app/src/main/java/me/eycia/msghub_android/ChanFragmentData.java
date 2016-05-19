@@ -22,6 +22,7 @@ public class ChanFragmentData {
     private MsgLine[] msgLines = new MsgLine[0];
     private ChanInfo chanInfo;
     private boolean noMore;
+    private boolean isFetching;
 
     public Notifier MsgLinesNotifier = new Notifier();
 
@@ -70,12 +71,15 @@ public class ChanFragmentData {
 
     public void GetOlder() {
         if (msgLines.length == 0) return;
+        if (noMore || isFetching) return;
+        isFetching = true;
 
         API.PageCallback(chanInfo.Id, 20, msgLines[msgLines.length - 1].Id,
                 msgLines[msgLines.length - 1].SnapTime, new API.Callback() {
 
                     @Override
                     public void Successful(final Object o) {
+                        isFetching = false;
                         if (o != null) {
                             MsgLine[] msgs = (MsgLine[]) (o);
 
@@ -116,7 +120,7 @@ public class ChanFragmentData {
 
                     @Override
                     public void Error(final Exception e) {
-
+                        isFetching = false;
                     }
                 });
     }
