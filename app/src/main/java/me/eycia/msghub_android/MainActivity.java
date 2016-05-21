@@ -3,11 +3,15 @@ package me.eycia.msghub_android;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
+import android.widget.ImageView;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 
@@ -19,6 +23,8 @@ public class MainActivity extends AppCompatActivity {
 
     private ViewPager mViewPager;
     private SlidingTabLayout mSlidingTabLayout;
+    private AppBarLayout mAppBarLayout;
+    private ImageView mTitleImage;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -28,10 +34,52 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_msgs_display);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        mTitleImage = (ImageView) findViewById(R.id.title_imgview);
+
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("");
         setSupportActionBar(toolbar);
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
+
+        mAppBarLayout = (AppBarLayout) findViewById(R.id.appbar2);
+        mAppBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            private boolean mIsTheTitleVisible;
+
+            public void startAlphaAnimation (View v, long duration, int visibility) {
+                AlphaAnimation alphaAnimation = (visibility == View.VISIBLE)
+                        ? new AlphaAnimation(0f, 1f)
+                        : new AlphaAnimation(1f, 0f);
+
+                
+
+                alphaAnimation.setDuration(duration);
+                alphaAnimation.setFillAfter(true);
+                v.startAnimation(alphaAnimation);
+            }
+
+            private void handleToolbarTitleVisibility(float percentage) {
+                if (percentage <= 0.3) {
+
+                    if(!mIsTheTitleVisible) {
+                        startAlphaAnimation(mTitleImage, 200, View.VISIBLE);
+                        mIsTheTitleVisible = true;
+                    }
+
+                } else {
+
+                    if (mIsTheTitleVisible) {
+                        startAlphaAnimation(mTitleImage, 200, View.INVISIBLE);
+                        mIsTheTitleVisible = false;
+                    }
+                }
+            }
+
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                int maxScroll = appBarLayout.getTotalScrollRange();
+                float percentage = (float) Math.abs(verticalOffset) / (float) maxScroll;
+                handleToolbarTitleVisibility(percentage);
+            }
+        });
 
         mMainActivityChannelsAdapter = new MainActivityChannelsAdapter(getSupportFragmentManager(), savedInstanceState);
         mMainActivityChannelsAdapter.ChansNotifier.addOnDataChangeListener(new Notifier.OnDataChangeListener() {

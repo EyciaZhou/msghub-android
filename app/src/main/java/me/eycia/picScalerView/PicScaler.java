@@ -18,25 +18,30 @@ public class PicScaler implements View.OnTouchListener {
 
     int method = 0;
 
+    ImageInfo imageInfo;
+
     View Layout, ToScale;
 
     public PicScaler(View Layout, View ToScale, ImageInfo imageInfo) {
         Layout.setOnTouchListener(this);
         this.Layout = Layout;
         this.ToScale = ToScale;
+        this.imageInfo = imageInfo;
 
         ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) ToScale.getLayoutParams();
-        lp.width = imageInfo.getWidth();
-        lp.height = imageInfo.getHeight();
+        //lp.width = imageInfo.getWidth();
+        //lp.height = imageInfo.getHeight();
 
+        //if (lp.width > Layout.getWidth()) {
         lp.width = Layout.getWidth();
         lp.height = Layout.getWidth() * imageInfo.getHeight() / imageInfo.getWidth();
+        //}
 
-        if (((lp.width + 0.0) / lp.height) > ((Layout.getWidth() + 0.0) / Layout.getHeight())) {
-            lp.topMargin = (Layout.getHeight() - lp.height) / 2;
-            lp.leftMargin = 0;
-        } else {
-            lp.topMargin = lp.leftMargin = 0;
+        lp.topMargin = (Layout.getHeight() - lp.height) / 2;
+        lp.leftMargin = (Layout.getWidth() - lp.width) / 2;
+
+        if (lp.height > Layout.getHeight()) {
+            lp.topMargin = 0;
         }
 
         ToScale.setLayoutParams(lp);

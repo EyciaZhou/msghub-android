@@ -7,6 +7,8 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -27,7 +29,9 @@ public class PictureView extends BaseView {
     TextView ItemTitle;
     TextView ItemTime;
     TextView ItemText;
-    SimpleDraweeView ListCover;
+    TextView ItemAuthor;
+    LinearLayout Body;
+    SimpleDraweeView ItemAuthorHead;
     SimpleDraweeView Pics[] = new SimpleDraweeView[9];
     int width;
 
@@ -39,31 +43,59 @@ public class PictureView extends BaseView {
         this.activity = activity;
     }
 
+    public void SetUpdateNine() {
+        Body.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                width = Body.getWidth();
+                UpdateNineLayout();
+            }
+        });
+    }
+
+    public void UpdateNineLayout() {
+        for (int i = 0; i < msgLine.Pics.length; i++) {
+            this.Pics[i].setVisibility(View.VISIBLE);
+            ViewGroup.LayoutParams lp = this.Pics[i].getLayoutParams();
+            if (width > 0) {
+                lp.height = lp.width = width / 3;
+            }
+            this.Pics[i].setLayoutParams(lp);
+        }
+
+        for (int i = msgLine.Pics.length; i < 9; i++) {
+            this.Pics[i].setVisibility(View.GONE);
+        }
+    }
+
     @Override
     public void UpdateInfo(MsgLine msgLine) {
         this.msgLine = msgLine;
 
+        this.ItemTitle.setVisibility(View.VISIBLE);
+        this.ItemText.setVisibility(View.VISIBLE);
         this.ItemTitle.setText(msgLine.Title);
-        if (msgLine.Title.equals("")) {
-            this.ItemTitle.setText(msgLine.AuthorName);
+        this.ItemAuthor.setText(msgLine.AuthorName);
+        this.ItemText.setText(msgLine.SubTitle);
+        if (this.ItemTitle.length() == 0) {
+            this.ItemTitle.setVisibility(View.GONE);
+        }
+        if (this.ItemText.length() == 0) {
+            this.ItemText.setVisibility(View.GONE);
         }
 
-        this.ItemText.setText(msgLine.SubTitle);
-
         this.ItemTime.setText(new PrettyTime().format(new Date(msgLine.PubTime * 1000)));
-        this.ListCover.setImageURI(Uri.parse(msgLine.AuthorCoverImg));
+        this.ItemAuthorHead.setImageURI(Uri.parse(msgLine.AuthorCoverImg));
+
+        this.SetUpdateNine();
+
+        this.UpdateNineLayout();
 
         for (int i = 0; i < msgLine.Pics.length; i++) {
-            ViewGroup.LayoutParams lp = this.Pics[i].getLayoutParams();
-            lp.height = lp.width = width / 3;
-            this.Pics[i].setLayoutParams(lp);
             this.Pics[i].setImageURI(Uri.parse(msgLine.Pics[i] + "-small"));
         }
 
         for (int i = msgLine.Pics.length; i < 9; i++) {
-            ViewGroup.LayoutParams lp = this.Pics[i].getLayoutParams();
-            lp.height = lp.width = 0;
-            this.Pics[i].setLayoutParams(lp);
             this.Pics[i].setImageURI(Uri.EMPTY);
         }
     }
@@ -98,7 +130,9 @@ public class PictureView extends BaseView {
         viewHolder.ItemTitle = (TextView) convertView.findViewById(R.id.ItemTitle);
         viewHolder.ItemTime = (TextView) convertView.findViewById(R.id.ItemTime);
         viewHolder.ItemText = (TextView) convertView.findViewById(R.id.ItemText);
-        viewHolder.ListCover = (SimpleDraweeView) convertView.findViewById(R.id.ListCover);
+        viewHolder.ItemAuthorHead = (SimpleDraweeView) convertView.findViewById(R.id.ListCover);
+        viewHolder.ItemAuthor = (TextView) convertView.findViewById(R.id.ItemAuthor);
+        viewHolder.Body = (LinearLayout) convertView.findViewById(R.id.body);
         viewHolder.Pics[0] = (SimpleDraweeView) convertView.findViewById(R.id.PIC11);
         viewHolder.Pics[1] = (SimpleDraweeView) convertView.findViewById(R.id.PIC12);
         viewHolder.Pics[2] = (SimpleDraweeView) convertView.findViewById(R.id.PIC13);
@@ -108,7 +142,9 @@ public class PictureView extends BaseView {
         viewHolder.Pics[6] = (SimpleDraweeView) convertView.findViewById(R.id.PIC31);
         viewHolder.Pics[7] = (SimpleDraweeView) convertView.findViewById(R.id.PIC32);
         viewHolder.Pics[8] = (SimpleDraweeView) convertView.findViewById(R.id.PIC33);
-        viewHolder.width = parent.getWidth();
+        viewHolder.width = viewHolder.Body.getMeasuredWidth();
+
+        viewHolder.SetUpdateNine();
 
         //viewHolder.ItemText.setAutoLinkMask(Linkify.WEB_URLS);
         //viewHolder.ItemText.setMovementMethod(LinkMovementMethod.getInstance());

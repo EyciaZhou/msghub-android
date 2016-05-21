@@ -26,8 +26,9 @@ import me.eycia.msghub_android.guider;
 public class NormalView extends BaseView {
     TextView ItemTitle;
     TextView ItemTime;
-    TextView ItemText;
-    SimpleDraweeView ListCover;
+    TextView ItemAuthor;
+    SimpleDraweeView ItemAuthorHead;
+    SimpleDraweeView ItemCover;
 
     MsgLine msgLine;
     Activity activity;
@@ -46,10 +47,17 @@ public class NormalView extends BaseView {
     public void UpdateInfo(MsgLine msgLine) {
         this.msgLine = msgLine;
 
-        ItemTitle.setText(msgLine.Title);
-        ItemText.setText(msgLine.SubTitle);
-        ItemTime.setText(new PrettyTime().format(new Date(msgLine.PubTime * 1000)));
-        ListCover.setImageURI(Uri.parse(msgLine.CoverImg + "-small"));
+        this.ItemTitle.setVisibility(View.VISIBLE);
+        this.ItemTitle.setText(msgLine.Title);
+        this.ItemAuthor.setText(msgLine.AuthorName);
+        if (this.ItemTitle.length() == 0) {
+            this.ItemTitle.setVisibility(View.GONE);
+        }
+
+        this.ItemTime.setText(new PrettyTime().format(new Date(msgLine.PubTime * 1000)));
+        this.ItemAuthorHead.setImageURI(Uri.parse(msgLine.AuthorCoverImg));
+
+        this.ItemCover.setImageURI(Uri.parse(msgLine.CoverImg + "-small"));
     }
 
     static class OnNormalClickListener implements View.OnClickListener {
@@ -78,8 +86,9 @@ public class NormalView extends BaseView {
 
         viewHolder.ItemTitle = (TextView) convertView.findViewById(R.id.ItemTitle);
         viewHolder.ItemTime = (TextView) convertView.findViewById(R.id.ItemTime);
-        viewHolder.ItemText = (TextView) convertView.findViewById(R.id.ItemText);
-        viewHolder.ListCover = (SimpleDraweeView) convertView.findViewById(R.id.ListCover);
+        viewHolder.ItemAuthorHead = (SimpleDraweeView) convertView.findViewById(R.id.ListCover);
+        viewHolder.ItemAuthor = (TextView) convertView.findViewById(R.id.ItemAuthor);
+        viewHolder.ItemCover = (SimpleDraweeView) convertView.findViewById(R.id.ItemCover);
 
         convertView.setOnClickListener(new OnNormalClickListener(viewHolder));
 
