@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +34,7 @@ public class PictureView extends BaseView {
     LinearLayout Body;
     SimpleDraweeView ItemAuthorHead;
     SimpleDraweeView Pics[] = new SimpleDraweeView[9];
-    int width;
+    static int width;
 
     MsgLine msgLine;
     Activity activity;
@@ -45,9 +46,11 @@ public class PictureView extends BaseView {
 
     public void SetUpdateNine() {
         Body.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+
             @Override
             public void onGlobalLayout() {
-                width = Body.getWidth();
+                Body.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                width = Math.max(width, Body.getWidth());
                 UpdateNineLayout();
             }
         });
@@ -58,7 +61,7 @@ public class PictureView extends BaseView {
             this.Pics[i].setVisibility(View.VISIBLE);
             ViewGroup.LayoutParams lp = this.Pics[i].getLayoutParams();
             if (width > 0) {
-                lp.height = lp.width = width / 3;
+                lp.height = lp.width = width/3;
             }
             this.Pics[i].setLayoutParams(lp);
         }
@@ -87,8 +90,9 @@ public class PictureView extends BaseView {
         this.ItemTime.setText(new PrettyTime().format(new Date(msgLine.PubTime * 1000)));
         this.ItemAuthorHead.setImageURI(Uri.parse(msgLine.AuthorCoverImg));
 
-        this.SetUpdateNine();
+        width = Math.max(Body.getWidth(), width);
 
+        this.SetUpdateNine();
         this.UpdateNineLayout();
 
         for (int i = 0; i < msgLine.Pics.length; i++) {
@@ -142,9 +146,9 @@ public class PictureView extends BaseView {
         viewHolder.Pics[6] = (SimpleDraweeView) convertView.findViewById(R.id.PIC31);
         viewHolder.Pics[7] = (SimpleDraweeView) convertView.findViewById(R.id.PIC32);
         viewHolder.Pics[8] = (SimpleDraweeView) convertView.findViewById(R.id.PIC33);
-        viewHolder.width = viewHolder.Body.getMeasuredWidth();
 
         viewHolder.SetUpdateNine();
+        //viewHolder.SetUpdateNine();
 
         //viewHolder.ItemText.setAutoLinkMask(Linkify.WEB_URLS);
         //viewHolder.ItemText.setMovementMethod(LinkMovementMethod.getInstance());

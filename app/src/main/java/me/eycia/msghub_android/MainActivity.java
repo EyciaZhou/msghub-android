@@ -1,17 +1,28 @@
 package me.eycia.msghub_android;
 
+import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 
@@ -25,6 +36,10 @@ public class MainActivity extends AppCompatActivity {
     private SlidingTabLayout mSlidingTabLayout;
     private AppBarLayout mAppBarLayout;
     private ImageView mTitleImage;
+    private DrawerLayout mDrawerLayout;
+    private LinearLayout mMenu;
+    private Toolbar mToolbar;
+    private TextView mTitleText;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -34,40 +49,47 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_msgs_display);
 
+        mTitleText = (TextView) findViewById(R.id.title_text);
+        mTitleText.setAlpha(0);
         mTitleImage = (ImageView) findViewById(R.id.title_imgview);
 
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("");
-        setSupportActionBar(toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mToolbar.setTitle("");
+        setSupportActionBar(mToolbar);
+
+        mMenu = (LinearLayout) findViewById(R.id.menuLL);
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBarDrawerToggle actionBarDrawerToggle=new ActionBarDrawerToggle(this,mDrawerLayout,R.string.navigation_drawer_open,R.string.navigation_drawer_close);
+        actionBarDrawerToggle.syncState();
+        mDrawerLayout.setDrawerListener(actionBarDrawerToggle);
 
         mAppBarLayout = (AppBarLayout) findViewById(R.id.appbar2);
         mAppBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             private boolean mIsTheTitleVisible;
 
             public void startAlphaAnimation (View v, long duration, int visibility) {
-                AlphaAnimation alphaAnimation = (visibility == View.VISIBLE)
-                        ? new AlphaAnimation(0f, 1f)
-                        : new AlphaAnimation(1f, 0f);
+                ObjectAnimator objectAnimation = (visibility == View.VISIBLE)
+                        ? ObjectAnimator.ofFloat(v, "alpha", 0f, 1f)
+                        : ObjectAnimator.ofFloat(v, "alpha", 1f, 0f);
 
-                
-
-                alphaAnimation.setDuration(duration);
-                alphaAnimation.setFillAfter(true);
-                v.startAnimation(alphaAnimation);
+                objectAnimation.setDuration(duration);
+                objectAnimation.start();
             }
 
             private void handleToolbarTitleVisibility(float percentage) {
                 if (percentage <= 0.3) {
-
                     if(!mIsTheTitleVisible) {
-                        startAlphaAnimation(mTitleImage, 200, View.VISIBLE);
+                        //startAlphaAnimation(mTitleImage, 200, View.VISIBLE);
+                        startAlphaAnimation(mTitleText, 200, View.INVISIBLE);
                         mIsTheTitleVisible = true;
                     }
-
                 } else {
-
                     if (mIsTheTitleVisible) {
-                        startAlphaAnimation(mTitleImage, 200, View.INVISIBLE);
+                        //startAlphaAnimation(mTitleImage, 200, View.INVISIBLE);
+                        startAlphaAnimation(mTitleText, 200, View.VISIBLE);
                         mIsTheTitleVisible = false;
                     }
                 }
@@ -77,7 +99,20 @@ public class MainActivity extends AppCompatActivity {
             public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
                 int maxScroll = appBarLayout.getTotalScrollRange();
                 float percentage = (float) Math.abs(verticalOffset) / (float) maxScroll;
-                handleToolbarTitleVisibility(percentage);
+                //handleToolbarTitleVisibility(percentage);
+
+                ViewGroup.LayoutParams lp = mTitleImage.getLayoutParams();
+                lp.height = (int) (0.6*(1-percentage/2.5) * appBarLayout.getHeight());
+                mTitleImage.setLayoutParams(lp);
+
+                //ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams)mTitleText.getLayoutParams();
+                mTitleText.setAlpha(percentage);
+                mSlidingTabLayout.setAlpha(1-percentage);
+                //mlp.topMargin = (int) ((1-percentage) * appBarLayout.getHeight());
+
+                //ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams)mMenu.getLayoutParams();
+                //lp.topMargin = mToolbar.getTop();
+                //mMenu.setLayoutParams(lp);
             }
         });
 
@@ -89,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         mSlidingTabLayout.setViewPager(mViewPager);
+                        mTitleText.setText(mMainActivityChannelsAdapter.getPageTitle(mViewPager.getCurrentItem()));
                     }
                 });
             }
@@ -96,16 +132,54 @@ public class MainActivity extends AppCompatActivity {
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                Log.d("msghub", mTitleText.getAlpha() + "");
+                mTitleText.setText(mMainActivityChannelsAdapter.getPageTitle(position));
+                Log.d("msghub", mTitleText.getAlpha() + "");
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
         mViewPager.setAdapter(mMainActivityChannelsAdapter);
 
         mSlidingTabLayout = (SlidingTabLayout) findViewById(R.id.tabs);
         mSlidingTabLayout.setViewPager(mViewPager);
         mSlidingTabLayout.setSelectedIndicatorColors(getResources().getColor(R.color.colorPrimaryDark));
 
+
+
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.setStatusBarColor(getResources().getColor(R.color.colorPrimary));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == android.R.id.home) {
+            if(  mDrawerLayout.isDrawerOpen(GravityCompat.START)
+                    ){
+                mDrawerLayout.closeDrawers();
+            }else{
+                mDrawerLayout.openDrawer(GravityCompat.START);
+            }
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

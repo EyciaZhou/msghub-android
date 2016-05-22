@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -9,7 +9,8 @@
         android:layout_height="fill_parent"
         android:id="@+id/swipeRefresh"
         android:layout_alignParentStart="true"
-        android:background="#000000">
+        android:background="#000000"
+        >
 
 
         <android.support.v7.widget.RecyclerView
@@ -23,4 +24,4 @@
     </android.support.v4.widget.SwipeRefreshLayout>
 
 
-</RelativeLayout>
+</LinearLayout>

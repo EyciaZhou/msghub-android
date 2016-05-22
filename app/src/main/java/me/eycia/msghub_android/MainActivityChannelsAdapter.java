@@ -7,6 +7,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import me.eycia.Notifier;
 import me.eycia.api.API;
 import me.eycia.api.ChanInfo;
@@ -71,10 +74,11 @@ public class MainActivityChannelsAdapter extends FragmentPagerAdapter {
     }
 
     @Override
-    public Fragment getItem(int position) {
+    public ChanFragment getItem(int position) {
         // getItem is called to instantiate the fragment for the given page.
         // Return a PlaceholderFragment (defined as a static inner class below).
-        return ChanFragment.newInstance(chans[position]);
+        ChanFragment cf = ChanFragment.newInstance(chans[position]);
+        return cf;
     }
 
     @Override

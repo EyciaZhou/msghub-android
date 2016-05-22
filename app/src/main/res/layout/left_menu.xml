@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/menuLL"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_gravity="start"
+    android:layout_marginTop="?attr/actionBarSize"
+    android:background="@android:color/white"
+    android:clickable="true"
+    android:orientation="vertical">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white">
+
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@+id/menu_background"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentStart="false"
+            android:background="#ffffff"
+            fresco:actualImageScaleType="centerCrop"
+            fresco:backgroundImage="@drawable/user_back"
+            fresco:viewAspectRatio="1.6" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/gradient"
+            android:layout_alignBottom="@+id/menu_background"
+            android:padding="20dp"
+            android:id="@+id/menu_up_login_frame">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="点击登陆/注册"
+                android:id="@+id/button_login_or_sign"
+                android:layout_gravity="center" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginStart="20dp"
+            android:background="@drawable/gradient"
+            android:layout_alignBottom="@+id/menu_background"
+            android:visibility="gone"
+            android:id="@+id/menu_up_logined_frame">
+
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:elevation="4dp"
+                fresco:backgroundImage="@drawable/mountain"
+                android:background="@drawable/round_head"
+                fresco:actualImageScaleType="centerCrop"
+                fresco:roundAsCircle="true"
+                fresco:roundingBorderWidth="2dp"
+                android:id="@+id/menu_user_head" />
+
+            <!--        fresco:roundingBorderColor="#ffffff" -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Eycia"
+                android:textColor="#ffffff"
+                android:id="@+id/menu_username"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:textSize="20dp" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New Button" />
+    </LinearLayout>
+
+</LinearLayout>
