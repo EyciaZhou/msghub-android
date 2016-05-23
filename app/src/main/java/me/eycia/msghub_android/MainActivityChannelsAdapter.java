@@ -2,13 +2,9 @@ package me.eycia.msghub_android;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
-import android.support.v4.app.Fragment;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import me.eycia.Notifier;
 import me.eycia.api.API;
@@ -20,9 +16,7 @@ import me.eycia.api.ChanInfo;
 public class MainActivityChannelsAdapter extends FragmentPagerAdapter {
     private ChanInfo[] chans;
 
-    private Handler uiHandler = new Handler(Looper.getMainLooper());
     private Handler cronHandler = new Handler();
-
     public Notifier ChansNotifier = new Notifier();
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -30,27 +24,18 @@ public class MainActivityChannelsAdapter extends FragmentPagerAdapter {
     }
 
     private void ChangeChansData(final ChanInfo[] cs) {
-        uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                chans = cs;
-                notifyDataSetChanged();
-                ChansNotifier.ChangeData();
-            }
-        });
+        chans = cs;
+        notifyDataSetChanged();
+        ChansNotifier.ChangeData();
     }
 
     private void CallAPI() {
-        API.ChansInfoCallback(new API.Callback() {
+        new API.ChansInfoTask() {
             @Override
-            public void Successful(Object o) {
-                ChangeChansData((ChanInfo[]) (o));
+            protected void onSuccess(@NonNull ChanInfo[] chanInfos) {
+                ChangeChansData(chanInfos);
             }
-
-            @Override
-            public void Error(Exception e) {
-            }
-        });
+        }.execute();
     }
 
     private Runnable cronUpdateChansInfo = new Runnable() {
@@ -75,8 +60,6 @@ public class MainActivityChannelsAdapter extends FragmentPagerAdapter {
 
     @Override
     public ChanFragment getItem(int position) {
-        // getItem is called to instantiate the fragment for the given page.
-        // Return a PlaceholderFragment (defined as a static inner class below).
         ChanFragment cf = ChanFragment.newInstance(chans[position]);
         return cf;
     }

@@ -1,6 +1,7 @@
 package me.eycia.api;
 
-import android.os.Looper;
+import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.util.Pair;
 import android.widget.Toast;
 
@@ -23,55 +24,98 @@ public class API {
     private static final String ADDR_MSGS = "https://msghub.eycia.me/msgs/";
     private static Pattern pattern = Pattern.compile("(\\d+)\\*(\\d+)");
 
-    static public void FireACallback(final callbackValueGenerator gv, final Callback callback) {
-        new Thread(new Runnable() {
+    static private abstract class ApiTask<Result> {
+        private class asyncTask extends AsyncTask<Void, Void, Result> {
+            private Exception Error;
+
+            private void dealWithError(Exception e) {
+                e.printStackTrace();
+                Toast.makeText(MyApplication.getAppContext(), e.toString(), Toast.LENGTH_SHORT).show();
+                onError(e);
+            }
+
             @Override
-            public void run() {
+            protected void onPostExecute(Result result) {
+                if (Error != null) {
+                    dealWithError(Error);
+                } else if (result != null) {
+                    onSuccess(result);
+                } else {
+                    dealWithError(new Exception("no Exception throw, but the Result is null"));
+                }
+                onFinish();
+            }
+
+            @Override
+            protected Result doInBackground(Void... params) {
                 try {
-                    final Object v = gv.Generate();
-                    if (v == null) {
-                        throw new Exception("result is nll");
-                    } else {
-                        callback.Successful(v);
-                    }
-                } catch (final Exception e) {
-                    e.printStackTrace();
-
-                    Looper.prepare();
-                    Toast.makeText(MyApplication.getAppContext(), e.toString(), Toast.LENGTH_SHORT).show();
-                    Looper.loop();
-
-                    callback.Error(e);
+                    return Task();
+                } catch (Exception e) {
+                    Error = e;
+                    return null;
                 }
             }
-        }).start();
+        }
+
+        private asyncTask mAsyncTask;
+
+        //Override by API
+        abstract protected Result Task() throws Exception;
+
+        //Override in somewhere like Activity
+        abstract protected void onSuccess(@NonNull Result result);
+
+        protected void onError(@NonNull Exception e) {
+        }
+
+        protected void onFinish() {
+        }
+
+        public ApiTask() {
+            this.mAsyncTask = new asyncTask();
+        }
+
+        public void execute() {
+            this.mAsyncTask.execute();
+        }
     }
 
-    static public void MsgCallback(final String Id, final Callback callback) {
-        FireACallback(new callbackValueGenerator() {
-            @Override
-            public Object Generate() throws Exception {
-                return APIMsg(Id);
-            }
-        }, callback);
+    static public abstract class FullMessageGetTask extends ApiTask<Msg> {
+        String Id;
+
+        public FullMessageGetTask(String id) {
+            this.Id = id;
+        }
+
+        @Override
+        protected Msg Task() throws Exception {
+            return APIMsg(Id);
+        }
     }
 
-    static public void PageCallback(final String ChanId, final int Limit, final String LstId, final long lstti, final Callback callback) {
-        FireACallback(new callbackValueGenerator() {
-            @Override
-            public Object Generate() throws Exception {
-                return APIPage(ChanId, Limit, LstId, lstti);
-            }
-        }, callback);
+    static public abstract class PageGetTask extends ApiTask<MsgLine[]> {
+        String ChanId, LstId;
+        int Limit;
+        long lstti;
+
+        public PageGetTask(String ChanId, int Limit, String LstId, long lstti) {
+            this.ChanId = ChanId;
+            this.Limit = Limit;
+            this.LstId = LstId;
+            this.lstti = lstti;
+        }
+
+        @Override
+        protected MsgLine[] Task() throws Exception {
+            return APIPage(ChanId, Limit, LstId, lstti);
+        }
     }
 
-    static public void ChansInfoCallback(final Callback callback) {
-        FireACallback(new callbackValueGenerator() {
-            @Override
-            public Object Generate() throws Exception {
-                return APIChansInfo();
-            }
-        }, callback);
+    static public abstract class ChansInfoTask extends ApiTask<ChanInfo[]> {
+        @Override
+        protected ChanInfo[] Task() throws Exception {
+            return APIChansInfo();
+        }
     }
 
     static private Pair<Integer, Integer> parsePixesFromStringToIntPair(String Pixes) {
@@ -110,18 +154,22 @@ public class API {
         return new ChanInfo(jo.getString("Id"), jo.getString("Title"), jo.getLong("LastModify"));
     }
 
+    static private String TryGetString(JSONObject jo, String key, String _default) throws JSONException {
+        if (!jo.isNull(key)) {
+            return _default;
+        }
+        return jo.getString(key);
+    }
+
     static private MsgBase parseMsgBaseFromJson(JSONObject jo) throws JSONException {
-        String CoverImg = "";
-        String Topic = "";
-        String AuthorId = "";
-        String AuthorCoverImg = "";
-        String AuthorName = "";
-        if (!jo.isNull("CoverImg")) CoverImg = jo.getString("CoverImg");
-        if (!jo.isNull("Topic")) Topic = jo.getString("Topic");
-        if (!jo.isNull("AuthorId")) AuthorId = jo.getString("AuthorId");
-        if (!jo.isNull("AuthorCoverImg"))
+        String CoverImg = TryGetString(jo, "CoverImg", "");
+        String Topic = TryGetString(jo, "Topic", "");
+        String AuthorId = TryGetString(jo, "AuthorId", "");
+        String AuthorCoverImg = TryGetString(jo, "AuthorCoverImg", "");
+        String AuthorName = TryGetString(jo, "AuthorName", "");
+
+        if (!AuthorCoverImg.equals(""))
             AuthorCoverImg = jo.getString("AuthorCoverImg") + "-small";
-        if (!jo.isNull("AuthorName")) AuthorName = jo.getString("AuthorName");
 
         return new MsgBase(AuthorCoverImg, AuthorId, AuthorName, CoverImg, jo.getString("Id"),
                 jo.getLong("PubTime"), jo.getLong("SnapTime"), jo.getString("SourceURL"),
@@ -185,16 +233,8 @@ public class API {
     }
 
     public static PicRef LoadPicRefFromJson(JSONObject jo) throws JSONException {
-        String Ref = "";
-        String Pixes = "";
-
-        if (!jo.isNull("Ref")) {
-            Ref = jo.getString("Ref");
-        }
-
-        if (!jo.isNull("Pixes")) {
-            Pixes = jo.getString("Pixes");
-        }
+        String Ref = TryGetString(jo, "Ref", "");
+        String Pixes = TryGetString(jo, "Pixes", "");
 
         return new PicRef(jo.getString("Description"), parsePixesFromStringToIntPair(Pixes), Ref, jo.getString("Url"));
     }
@@ -205,15 +245,5 @@ public class API {
             result[i] = LoadPicRefFromJson(ja.getJSONObject(i));
         }
         return result;
-    }
-
-    public interface Callback {
-        void Successful(Object o);
-
-        void Error(Exception e);
-    }
-
-    private interface callbackValueGenerator {
-        Object Generate() throws Exception;
     }
 }

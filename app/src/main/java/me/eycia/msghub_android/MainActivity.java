@@ -1,33 +1,26 @@
 package me.eycia.msghub_android;
 
-import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.AlphaAnimation;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.google.view.SlidingTabLayout;
 
 import me.eycia.Notifier;
-import me.eycia.view.SlidingTabLayout;
 
 public class MainActivity extends AppCompatActivity {
     private MainActivityChannelsAdapter mMainActivityChannelsAdapter;
@@ -37,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private AppBarLayout mAppBarLayout;
     private ImageView mTitleImage;
     private DrawerLayout mDrawerLayout;
-    private LinearLayout mMenu;
+    private LeftMenuLayoutController mMenu;
     private Toolbar mToolbar;
     private TextView mTitleText;
 
@@ -57,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         mToolbar.setTitle("");
         setSupportActionBar(mToolbar);
 
-        mMenu = (LinearLayout) findViewById(R.id.menuLL);
+        mMenu = new LeftMenuLayoutController(this);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -68,51 +61,17 @@ public class MainActivity extends AppCompatActivity {
 
         mAppBarLayout = (AppBarLayout) findViewById(R.id.appbar2);
         mAppBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-            private boolean mIsTheTitleVisible;
-
-            public void startAlphaAnimation (View v, long duration, int visibility) {
-                ObjectAnimator objectAnimation = (visibility == View.VISIBLE)
-                        ? ObjectAnimator.ofFloat(v, "alpha", 0f, 1f)
-                        : ObjectAnimator.ofFloat(v, "alpha", 1f, 0f);
-
-                objectAnimation.setDuration(duration);
-                objectAnimation.start();
-            }
-
-            private void handleToolbarTitleVisibility(float percentage) {
-                if (percentage <= 0.3) {
-                    if(!mIsTheTitleVisible) {
-                        //startAlphaAnimation(mTitleImage, 200, View.VISIBLE);
-                        startAlphaAnimation(mTitleText, 200, View.INVISIBLE);
-                        mIsTheTitleVisible = true;
-                    }
-                } else {
-                    if (mIsTheTitleVisible) {
-                        //startAlphaAnimation(mTitleImage, 200, View.INVISIBLE);
-                        startAlphaAnimation(mTitleText, 200, View.VISIBLE);
-                        mIsTheTitleVisible = false;
-                    }
-                }
-            }
-
             @Override
             public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
                 int maxScroll = appBarLayout.getTotalScrollRange();
                 float percentage = (float) Math.abs(verticalOffset) / (float) maxScroll;
-                //handleToolbarTitleVisibility(percentage);
 
                 ViewGroup.LayoutParams lp = mTitleImage.getLayoutParams();
                 lp.height = (int) (0.6*(1-percentage/2.5) * appBarLayout.getHeight());
                 mTitleImage.setLayoutParams(lp);
 
-                //ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams)mTitleText.getLayoutParams();
                 mTitleText.setAlpha(percentage);
                 mSlidingTabLayout.setAlpha(1-percentage);
-                //mlp.topMargin = (int) ((1-percentage) * appBarLayout.getHeight());
-
-                //ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams)mMenu.getLayoutParams();
-                //lp.topMargin = mToolbar.getTop();
-                //mMenu.setLayoutParams(lp);
             }
         });
 
@@ -140,9 +99,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                Log.d("msghub", mTitleText.getAlpha() + "");
                 mTitleText.setText(mMainActivityChannelsAdapter.getPageTitle(position));
-                Log.d("msghub", mTitleText.getAlpha() + "");
             }
 
             @Override

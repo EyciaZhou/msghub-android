@@ -2,6 +2,7 @@ package me.eycia.msghub_android;
 
 import android.os.Bundle;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.widget.Toast;
 
 import java.util.Arrays;
@@ -50,23 +51,18 @@ public class ChanFragmentData {
     }
 
     public void GetNewer() {
-        API.PageCallback(chanInfo.Id, 20, "0", -1, new API.Callback() {
-
+        new API.PageGetTask(chanInfo.Id, 20, "0", -1) {
             @Override
-            public void Successful(final Object o) {
-                if (o != null) {
-                    MsgLine[] msgs = (MsgLine[]) (o);
-                    Arrays.sort(msgs);
-                    msgLines = msgs;
-                }
-                MsgLinesNotifier.ChangeData();
+            protected void onSuccess(@NonNull MsgLine[] msgLines) {
+                Arrays.sort(msgLines);
+                ChanFragmentData.this.msgLines = msgLines;
             }
 
             @Override
-            public void Error(final Exception e) {
+            protected void onFinish() {
                 MsgLinesNotifier.ChangeData();
             }
-        });
+        }.execute();
     }
 
     public void GetOlder() {
@@ -74,54 +70,48 @@ public class ChanFragmentData {
         if (noMore || isFetching) return;
         isFetching = true;
 
-        API.PageCallback(chanInfo.Id, 20, msgLines[msgLines.length - 1].Id,
-                msgLines[msgLines.length - 1].SnapTime, new API.Callback() {
+        new API.PageGetTask(chanInfo.Id, 20, msgLines[msgLines.length - 1].Id,
+                msgLines[msgLines.length - 1].SnapTime) {
+            @Override
+            protected void onSuccess(@NonNull MsgLine[] msgs) {
+                if (msgs.length == 0) {
+                    noMore = true;
+                    Looper.prepare();
+                    Toast.makeText(MyApplication.getAppContext(), "No More", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-                    @Override
-                    public void Successful(final Object o) {
-                        isFetching = false;
-                        if (o != null) {
-                            MsgLine[] msgs = (MsgLine[]) (o);
+                if (msgLines == null || msgLines.length == 0) {
+                    msgLines = msgs;
+                    MsgLinesNotifier.ChangeData();
+                    return;
+                }
 
-                            if (msgs.length == 0) {
-                                noMore = true;
-                                Looper.prepare();
-                                Toast.makeText(MyApplication.getAppContext(), "No More", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
+                Set<String> DupRemove = new HashSet<>();
 
-                            if (msgLines == null || msgLines.length == 0) {
-                                msgLines = msgs;
-                                MsgLinesNotifier.ChangeData();
-                                return;
-                            }
+                Vector<MsgLine> msgsFinal = new Vector<>();
 
-                            Set<String> DupRemove = new HashSet<>();
+                for (MsgLine m : msgs) {
+                    msgsFinal.add(m);
+                    DupRemove.add(m.Id);
+                }
 
-                            Vector<MsgLine> msgsFinal = new Vector<>();
-
-                            for (MsgLine m : msgs) {
-                                msgsFinal.add(m);
-                                DupRemove.add(m.Id);
-                            }
-
-                            for (MsgLine m : msgLines) {
-                                if (!DupRemove.contains(m.Id)) {
-                                    msgsFinal.add(m);
-                                    DupRemove.add(m.Id);
-                                }
-                            }
-
-                            Collections.sort(msgsFinal);
-                            msgLines = msgsFinal.toArray(new MsgLine[msgsFinal.size()]);
-                            MsgLinesNotifier.ChangeData();
-                        }
+                for (MsgLine m : msgLines) {
+                    if (!DupRemove.contains(m.Id)) {
+                        msgsFinal.add(m);
+                        DupRemove.add(m.Id);
                     }
+                }
 
-                    @Override
-                    public void Error(final Exception e) {
-                        isFetching = false;
-                    }
-                });
+                Collections.sort(msgsFinal);
+                msgLines = msgsFinal.toArray(new MsgLine[msgsFinal.size()]);
+                MsgLinesNotifier.ChangeData();
+            }
+
+            @Override
+            protected void onFinish() {
+                isFetching = false;
+            }
+        }.execute();
     }
 }

@@ -2,6 +2,7 @@ package me.eycia.msghub_android;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 
 import me.eycia.api.API;
@@ -22,37 +23,36 @@ public class guider extends AppCompatActivity {
             mid = intent.getStringExtra("mid");
         }
 
-        API.MsgCallback(mid, new API.Callback() {
+        new API.FullMessageGetTask(mid) {
             @Override
-            public void Successful(final Object o) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Msg m = (Msg) (o);
-                        Intent intent_to = null;
-                        if (m.ViewType == API.VIEW_NORMAL) {
-                            intent_to = new Intent(guider.this, MoreInfoActivity.class);
-                        } else if (m.ViewType == API.VIEW_PICTURE) {
-                            intent_to = new Intent(guider.this, pictures.class);
-                            intent_to.putExtra("clicked_pic", getIntent().getIntExtra("clicked_pic", 0));
-                        }
-                        intent_to.putExtra("m", m);
-                        guider.this.startActivity(intent_to);
-                        finish();
-                    }
-                });
+            protected void onSuccess(@NonNull Msg msg) {
+                Intent intent_to;
+                if (msg.ViewType == API.VIEW_NORMAL) {
+                    intent_to = new Intent(guider.this, MoreInfoActivity.class);
+                } else /*if (msg.ViewType == API.VIEW_PICTURE)*/ {
+                    intent_to = new Intent(guider.this, pictures.class);
+                    intent_to.putExtra("clicked_pic", getIntent().getIntExtra("clicked_pic", 0));
+                }
+                intent_to.putExtra("m", msg);
+                guider.this.startActivity(intent_to);
+                finish(); //close the window of "guider"
             }
-
-            @Override
-            public void Error(Exception e) {
-
-            }
-        });
+        }.execute();
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putString("mid", mid);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
     }
 }

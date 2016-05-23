@@ -1,18 +1,13 @@
 package me.eycia.msghub_android;
 
 import android.os.Bundle;
-import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import me.eycia.Notifier;
 import me.eycia.api.API;
@@ -25,8 +20,8 @@ import me.eycia.views.PictureView;
  * A placeholder fragment containing a simple view.
  */
 public class ChanFragment extends Fragment {
-    private RecyclerView lv;
-    private SwipeRefreshLayout mrl;
+    private RecyclerView mRecyclerView;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
     private ChanFragmentData mChanFragmentData;
 
     LinearLayoutManager mLayoutManager;
@@ -75,7 +70,7 @@ public class ChanFragment extends Fragment {
     };
 
     public void UpdateView() {
-        mrl.setRefreshing(false);
+        mSwipeRefreshLayout.setRefreshing(false);
         RecyclerViewAdapter.notifyDataSetChanged();
     }
 
@@ -109,10 +104,10 @@ public class ChanFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_msgs_display, container, false);
 
-        mrl = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeRefresh);
-        lv = (RecyclerView) rootView.findViewById(R.id.listView2);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeRefresh);
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.listView2);
 
-        lv.setAdapter(RecyclerViewAdapter);
+        mRecyclerView.setAdapter(RecyclerViewAdapter);
 
         SwipeRefreshLayout.OnRefreshListener refreshListener = new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -121,23 +116,23 @@ public class ChanFragment extends Fragment {
             }
         };
 
-        mrl.setOnRefreshListener(refreshListener);
+        mSwipeRefreshLayout.setOnRefreshListener(refreshListener);
 
         if (savedInstanceState == null) {
-            mrl.setRefreshing(true);
+            mSwipeRefreshLayout.setRefreshing(true);
             refreshListener.onRefresh();
         } else {
             UpdateView();
         }
 
-        lv.setOnScrollListener(new RecyclerView.OnScrollListener() {
+        mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
                 int topRowVerticalPosition =
                         (recyclerView == null || recyclerView.getChildCount() == 0) ? 0 : recyclerView.getChildAt(0).getTop();
-                mrl.setEnabled(topRowVerticalPosition >= 0);
+                mSwipeRefreshLayout.setEnabled(topRowVerticalPosition >= 0);
 
 
                 if (dy > 0) {
@@ -159,7 +154,7 @@ public class ChanFragment extends Fragment {
 
         mLayoutManager = new LinearLayoutManager(getContext());
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        lv.setLayoutManager(mLayoutManager);
+        mRecyclerView.setLayoutManager(mLayoutManager);
 
         return rootView;
     }

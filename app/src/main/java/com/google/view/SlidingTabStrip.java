@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.eycia.view;
+package com.google.view;
 
 import android.R;
 import android.content.Context;

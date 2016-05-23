@@ -74,14 +74,14 @@
                 android:layout_marginTop="?attr/actionBarSize"
                 android:theme="@style/AppTheme.AppBarOverlay">
 
-                <me.eycia.view.SlidingTabLayout
+                <com.google.view.SlidingTabLayout
                     android:id="@+id/tabs"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/colorPrimary"
                     app:layout_scrollFlags="scroll|enterAlways|snap">
 
-                </me.eycia.view.SlidingTabLayout>
+                </com.google.view.SlidingTabLayout>
 
 
             </android.support.design.widget.AppBarLayout>
