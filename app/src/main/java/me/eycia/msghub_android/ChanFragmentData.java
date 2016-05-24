@@ -51,7 +51,7 @@ public class ChanFragmentData {
     }
 
     public void GetNewer() {
-        new API.PageGetTask(chanInfo.Id, 20, "0", -1) {
+        new API.Msgs.PageGetTask(chanInfo.Id, 20, "0", -1) {
             @Override
             protected void onSuccess(@NonNull MsgLine[] msgLines) {
                 Arrays.sort(msgLines);
@@ -70,7 +70,7 @@ public class ChanFragmentData {
         if (noMore || isFetching) return;
         isFetching = true;
 
-        new API.PageGetTask(chanInfo.Id, 20, msgLines[msgLines.length - 1].Id,
+        new API.Msgs.PageGetTask(chanInfo.Id, 20, msgLines[msgLines.length - 1].Id,
                 msgLines[msgLines.length - 1].SnapTime) {
             @Override
             protected void onSuccess(@NonNull MsgLine[] msgs) {

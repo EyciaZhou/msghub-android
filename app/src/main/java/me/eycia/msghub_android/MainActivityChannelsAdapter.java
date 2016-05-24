@@ -30,7 +30,7 @@ public class MainActivityChannelsAdapter extends FragmentPagerAdapter {
     }
 
     private void CallAPI() {
-        new API.ChansInfoTask() {
+        new API.Msgs.ChansInfoTask() {
             @Override
             protected void onSuccess(@NonNull ChanInfo[] chanInfos) {
                 ChangeChansData(chanInfos);
@@ -42,7 +42,7 @@ public class MainActivityChannelsAdapter extends FragmentPagerAdapter {
         @Override
         public void run() {
             CallAPI();
-            cronHandler.postDelayed(this, 10000);
+            //cronHandler.postDelayed(this, 10000);
         }
     };
 

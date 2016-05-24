@@ -23,7 +23,7 @@ public class guider extends AppCompatActivity {
             mid = intent.getStringExtra("mid");
         }
 
-        new API.FullMessageGetTask(mid) {
+        new API.Msgs.FullMessageGetTask(mid) {
             @Override
             protected void onSuccess(@NonNull Msg msg) {
                 Intent intent_to;

@@ -10,10 +10,14 @@ import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
+import me.eycia.api.UserBaseInfo;
+
 /**
  * Created by eycia on 16/5/22.
  */
 public class LeftMenuLayoutController {
+    public static final int TO_LOGIN = 1;
+
     public LinearLayout view;
     private Activity mActivity;
     private SimpleDraweeView mBackgound;
@@ -31,7 +35,7 @@ public class LeftMenuLayoutController {
             @Override
             public void onClick(View v) {
                 Intent it = new Intent(mActivity.getApplicationContext(), LoginActivity.class);
-                mActivity.startActivity(it);
+                mActivity.startActivityForResult(it, TO_LOGIN);
             }
         };
 
@@ -49,7 +53,7 @@ public class LeftMenuLayoutController {
         private SimpleDraweeView mHeadView;
         private TextView mUsername;
 
-        public void SetUserInfo(String Username, String HeadUrl) {
+        public void showUserInfo(String Username, String HeadUrl) {
             mHeadView.setImageURI(Uri.parse(HeadUrl));
             mUsername.setText(Username);
         }
@@ -60,19 +64,31 @@ public class LeftMenuLayoutController {
             mHeadView = (SimpleDraweeView) activity.findViewById(R.id.menu_user_head);
             mUsername = (TextView) activity.findViewById(R.id.menu_username);
         }
+
+        public void showUserInfo(UserBaseInfo userBaseInfo) {
+            mUsername.setText(userBaseInfo.Nickname);
+        }
     }
 
-    public void ToggleLogined(boolean isLogined) {
+    public void setUserInfo(UserBaseInfo userBaseInfo) {
+        if (userBaseInfo == null) {
+            return;
+        }
+        ToggleLogined(true);
+        mFrameLogined.showUserInfo(userBaseInfo);
+    }
+
+    private void ToggleLogined(boolean isLogined) {
         if (isLogined == Logined) {
             return;
         }
         Logined = isLogined;
         if (isLogined) {
-            mFrameLogin.view.setVisibility(View.VISIBLE);
-            mFrameLogined.view.setVisibility(View.GONE);
-        } else {
             mFrameLogin.view.setVisibility(View.GONE);
             mFrameLogined.view.setVisibility(View.VISIBLE);
+        } else {
+            mFrameLogin.view.setVisibility(View.VISIBLE);
+            mFrameLogined.view.setVisibility(View.GONE);
         }
     }
 
@@ -88,5 +104,23 @@ public class LeftMenuLayoutController {
         mBackgound = (SimpleDraweeView) activity.findViewById(R.id.menu_background);
         mFrameLogin = new FrameLogin(activity);
         mFrameLogined = new FrameLogined(activity);
+
+        UserBaseInfo userBaseInfo = ((MyApplication) activity.getApplication()).getUserBaseInfo();
+        if (userBaseInfo != null) {
+            setUserInfo(userBaseInfo);
+        }
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case TO_LOGIN:
+                if (resultCode == Activity.RESULT_OK) {
+                    UserBaseInfo userBaseInfo = data.getParcelableExtra("userBaseInfo");
+                    if (userBaseInfo != null) {
+                        setUserInfo(userBaseInfo);
+                    }
+                }
+        }
     }
 }
+
