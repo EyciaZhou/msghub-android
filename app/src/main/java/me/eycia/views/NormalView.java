@@ -100,7 +100,6 @@ public class NormalView extends BaseView {
         NormalView viewHolder = new NormalView(activity, convertView);
 
         viewHolder.mNormalViewHandler = new NormalViewHandler(convertView);
-
         convertView.setOnClickListener(new OnNormalClickListener(viewHolder));
 
         convertView.setTag(viewHolder);

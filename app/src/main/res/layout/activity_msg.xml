@@ -1,45 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main_content2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="top"
     android:fitsSystemWindows="true"
     tools:context=".MoreInfoActivity">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/appbar2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <android.support.design.widget.CollapsingToolbarLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_scrollFlags="scroll|enterAlways|snap">
-
-            <include layout="@layout/normal_view_item"></include>
-        </android.support.design.widget.CollapsingToolbarLayout>
-
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar2"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay">
-
-        </android.support.v7.widget.Toolbar>
-
-    </android.support.design.widget.AppBarLayout>
-
-    <com.google.view.NestedWebView
-        android:id="@+id/webView"
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/main_content2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
 
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/appbar2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+            <android.support.design.widget.CollapsingToolbarLayout
+                android:id="@+id/collaps"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_scrollFlags="scroll|snap|exitUntilCollapsed">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_collapseMode="parallax">
+
+                    <com.facebook.drawee.view.SimpleDraweeView
+                        android:id="@+id/ItemCover"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        fresco:progressBarAutoRotateInterval="3000"
+                        fresco:progressBarImage="@drawable/circle"
+                        fresco:progressBarImageScaleType="fitCenter"
+                        app:layout_collapseMode="parallax"
+                        android:background="#ffffff" />
+
+                    <LinearLayout
+                        android:id="@+id/gradient"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:background="@drawable/gradient"/>
 
 
-</android.support.design.widget.CoordinatorLayout>
+                </RelativeLayout>
+
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/toolbar2"
+                    android:layout_width="match_parent"
+                    android:layout_height="?android:attr/actionBarSize"
+                    app:layout_collapseMode="pin"
+                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+                </android.support.v7.widget.Toolbar>
+
+
+
+            </android.support.design.widget.CollapsingToolbarLayout>
+
+        </android.support.design.widget.AppBarLayout>
+
+        <com.tobiasrohloff.view.NestedScrollWebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        </com.tobiasrohloff.view.NestedScrollWebView>
+    </android.support.design.widget.CoordinatorLayout>
+</RelativeLayout>

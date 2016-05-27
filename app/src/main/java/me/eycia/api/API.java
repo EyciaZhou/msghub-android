@@ -304,6 +304,13 @@ public class API {
             }
         }
 
+        static public abstract class ChangeAvatarTask extends ApiTask<String> {
+            @Override
+            protected String Task() throws Exception {
+                return APIChangeAvatarToken();
+            }
+        }
+
         static private UserBaseInfo parseUserInfoFromJson(JSONObject jo) throws JSONException {
             return new UserBaseInfo(jo.getString("Email"), jo.getString("Id"),
                     jo.getString("Nickname"), jo.getString("Username"));
@@ -332,6 +339,15 @@ public class API {
             par.put("email", email);
 
             JSONObject jo = http.Post(ADDR_USER + PATH, par);
+            throwAPIError(jo);
+
+            return jo.getString("data");
+        }
+
+        static private String APIChangeAvatarToken() throws Exception {
+            final String PATH = "head/token";
+
+            JSONObject jo = http.GetJson(ADDR_USER + PATH);
             throwAPIError(jo);
 
             return jo.getString("data");

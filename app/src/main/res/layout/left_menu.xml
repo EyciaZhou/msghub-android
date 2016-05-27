@@ -51,8 +51,8 @@
             android:layout_marginStart="20dp"
             android:background="@drawable/gradient"
             android:layout_alignBottom="@+id/menu_background"
-            android:visibility="gone"
-            android:id="@+id/menu_up_logined_frame">
+            android:id="@+id/menu_up_logined_frame"
+            android:visibility="gone">
 
             <com.facebook.drawee.view.SimpleDraweeView
                 android:layout_width="80dp"

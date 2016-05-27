@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
                 int maxScroll = appBarLayout.getTotalScrollRange();
                 float percentage = (float) Math.abs(verticalOffset) / (float) maxScroll;
 
+
                 ViewGroup.LayoutParams lp = mTitleImage.getLayoutParams();
                 lp.height = (int) (0.6*(1-percentage/2.5) * appBarLayout.getHeight());
                 mTitleImage.setLayoutParams(lp);
