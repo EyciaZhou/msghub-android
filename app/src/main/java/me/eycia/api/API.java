@@ -1,16 +1,24 @@
 package me.eycia.api;
 
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.util.Pair;
-import android.widget.Toast;
 
 import com.facebook.common.util.Hex;
+import com.google.common.io.ByteStreams;
+import com.qiniu.android.common.Zone;
+import com.qiniu.android.http.ResponseInfo;
+import com.qiniu.android.storage.Configuration;
+import com.qiniu.android.storage.UpCompletionHandler;
+import com.qiniu.android.storage.UploadManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -34,7 +42,7 @@ public class API {
 
             private void dealWithError(Exception e) {
                 e.printStackTrace();
-                Toast.makeText(MyApplication.getAppContext(), e.toString(), Toast.LENGTH_SHORT).show();
+                MyApplication.showToast(e.getMessage());
                 onError(e);
             }
 
@@ -43,7 +51,11 @@ public class API {
                 if (Error != null) {
                     dealWithError(Error);
                 } else if (result != null) {
-                    onSuccess(result);
+                    try {
+                        onSuccess(result);
+                    } catch (Exception e) {
+
+                    }
                 } else {
                     dealWithError(new Exception("no Exception throw, but the Result is null"));
                 }
@@ -67,7 +79,7 @@ public class API {
         abstract protected Result Task() throws Exception;
 
         //Override in somewhere like Activity
-        abstract protected void onSuccess(@NonNull Result result);
+        abstract protected void onSuccess(@NonNull Result result) throws Exception;
 
         protected void onError(@NonNull Exception e) {
         }
@@ -305,14 +317,59 @@ public class API {
         }
 
         static public abstract class ChangeAvatarTask extends ApiTask<String> {
+            Uri uri;
+            ResponseInfo o_info = null;
+            JSONObject o_response = null;
+
+            public ChangeAvatarTask(Uri uriPicture) {
+                this.uri = uriPicture;
+            }
+
             @Override
             protected String Task() throws Exception {
-                return APIChangeAvatarToken();
+                String token = APIChangeAvatarToken();
+
+                Configuration config = new Configuration.Builder().connectTimeout(10).responseTimeout(10).zone(Zone.zone0).build();
+                UploadManager uploadManager = new UploadManager(config);
+
+                InputStream inputStream = MyApplication.getAppContext().getContentResolver().openInputStream(uri);
+                byte[] bytes = ByteStreams.toByteArray(inputStream);
+
+                if (MyApplication.getUserBaseInfo() == null) {
+                    throw new Exception("用户没有登录");
+                }
+
+                uploadManager.put(bytes, MyApplication.getUserBaseInfo().Id, token, new UpCompletionHandler() {
+                    @Override
+                    public void complete(String key, ResponseInfo info, JSONObject response) {
+                        synchronized (ChangeAvatarTask.this) {
+                            o_info = info;
+                            o_response = response;
+                            ChangeAvatarTask.this.notify();
+                        }
+                    }
+                }, null);
+
+                synchronized (this) {
+                    this.wait();
+                }
+
+                if (!o_info.isOK() || o_response == null) {
+                    throw new Exception("上传头像时错误:" + o_info.error);
+                }
+
+                throwAPIError(o_response);
+
+                Log.d("msghub", o_response.toString());
+
+                Thread.sleep(2000);
+
+                return o_response.getString("data");
             }
         }
 
         static private UserBaseInfo parseUserInfoFromJson(JSONObject jo) throws JSONException {
-            return new UserBaseInfo(jo.getString("Email"), jo.getString("Id"),
+            return new UserBaseInfo(jo.getString("Email"), jo.getString("Head"), jo.getString("Id"),
                     jo.getString("Nickname"), jo.getString("Username"));
         }
 

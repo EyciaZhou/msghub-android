@@ -4,24 +4,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.view.SimpleDraweeView;
-import com.google.common.io.ByteStreams;
-import com.qiniu.android.common.Zone;
-import com.qiniu.android.http.ResponseInfo;
-import com.qiniu.android.storage.Configuration;
-import com.qiniu.android.storage.UpCompletionHandler;
-import com.qiniu.android.storage.UploadManager;
-
-import org.json.JSONObject;
-
-import java.io.InputStream;
 
 import me.eycia.api.API;
 import me.eycia.api.UserBaseInfo;
@@ -66,41 +55,12 @@ public class LeftMenuLayoutController {
         private SimpleDraweeView mHeadView;
         private TextView mUsername;
 
-        public void showUserInfo(String Username, String HeadUrl) {
-            mHeadView.setImageURI(Uri.parse(HeadUrl));
-            mUsername.setText(Username);
-        }
-
-        public void startUpload(final Uri uri) {
-            new API.User.ChangeAvatarTask() {
+        public void startUpload(final Uri uriPicture) {
+            new API.User.ChangeAvatarTask(uriPicture) {
                 @Override
-                protected void onSuccess(@NonNull String token) {
-                    Log.d("msghub", token);
-
-                    Configuration config = new Configuration.Builder().connectTimeout(10).responseTimeout(10).zone(Zone.zone0).build();
-                    UploadManager uploadManager = new UploadManager(config);
-
-                    try {
-                        InputStream inputStream = mActivity.getApplicationContext().getContentResolver().openInputStream(uri);
-                        byte[] bytes = ByteStreams.toByteArray(inputStream);
-
-                        uploadManager.put(bytes, ((MyApplication) (mActivity.getApplication())).getUserBaseInfo().Id, token, new UpCompletionHandler() {
-                            @Override
-                            public void complete(String key, ResponseInfo info, JSONObject response) {
-                                if (key != null) {
-                                    Log.d("msghub", "key:" + key);
-                                }
-                                if (info != null) {
-                                    Log.d("msghub", "info:" + info.toString());
-                                }
-                                if (response != null) {
-                                    Log.d("msghub", "response:" + response.toString());
-                                }
-                            }
-                        }, null);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                protected void onSuccess(@NonNull String url) throws Exception {
+                    Fresco.getImagePipeline().evictFromCache(Uri.parse(url));
+                    mHeadView.setImageURI(Uri.parse(url));
                 }
             }.execute();
         }
@@ -127,6 +87,7 @@ public class LeftMenuLayoutController {
 
         public void showUserInfo(UserBaseInfo userBaseInfo) {
             mUsername.setText(userBaseInfo.Nickname);
+            mHeadView.setImageURI(Uri.parse(userBaseInfo.HeadUrl));
         }
     }
 
@@ -184,7 +145,7 @@ public class LeftMenuLayoutController {
             case TO_SELECT_AVATAR:
                 if (resultCode == Activity.RESULT_OK) {
                     if (data == null) {
-                        Toast.makeText(MyApplication.getAppContext(), "选择图片失败", Toast.LENGTH_SHORT).show();
+                        MyApplication.showToast("选择图片失败");
                         return;
                     }
                     mFrameLogined.startUpload(data.getData());

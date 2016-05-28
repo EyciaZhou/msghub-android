@@ -2,6 +2,7 @@ package me.eycia.msghub_android;
 
 import android.app.Application;
 import android.content.Context;
+import android.widget.Toast;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -13,7 +14,7 @@ import me.eycia.api.UserBaseInfo;
  */
 public class MyApplication extends Application {
     private static Context context;
-    private UserBaseInfo userBaseInfo;
+    private static UserBaseInfo userBaseInfo;
 
     public void onCreate() {
         super.onCreate();
@@ -22,15 +23,19 @@ public class MyApplication extends Application {
         CookieHandler.setDefault(new CookieManager());
     }
 
+    public static void showToast(String info) {
+        Toast.makeText(context, info, Toast.LENGTH_SHORT).show();
+    }
+
     public static Context getAppContext() {
         return MyApplication.context;
     }
 
-    public UserBaseInfo getUserBaseInfo() {
+    public static UserBaseInfo getUserBaseInfo() {
         return userBaseInfo;
     }
 
     public void setUserBaseInfo(UserBaseInfo userBaseInfo) {
-        this.userBaseInfo = userBaseInfo;
+        MyApplication.userBaseInfo = userBaseInfo;
     }
 }
