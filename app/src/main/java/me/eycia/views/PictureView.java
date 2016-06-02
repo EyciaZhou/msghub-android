@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +18,7 @@ import org.ocpsoft.prettytime.PrettyTime;
 import java.util.Date;
 
 import me.eycia.api.API;
-import me.eycia.api.MsgLine;
+import me.eycia.api.MsgBase;
 import me.eycia.msghub_android.R;
 import me.eycia.msghub_android.guider;
 
@@ -36,7 +35,7 @@ public class PictureView extends BaseView {
     SimpleDraweeView Pics[] = new SimpleDraweeView[9];
     static int width;
 
-    MsgLine msgLine;
+    MsgBase msgLine;
     Activity activity;
 
     public PictureView(Activity activity, View view) {
@@ -57,7 +56,7 @@ public class PictureView extends BaseView {
     }
 
     public void UpdateNineLayout() {
-        for (int i = 0; i < msgLine.Pics.length; i++) {
+        for (int i = 0; i < 9 && i < msgLine.getPicRefs().length; i++) {
             this.Pics[i].setVisibility(View.VISIBLE);
             ViewGroup.LayoutParams lp = this.Pics[i].getLayoutParams();
             if (width > 0) {
@@ -66,20 +65,20 @@ public class PictureView extends BaseView {
             this.Pics[i].setLayoutParams(lp);
         }
 
-        for (int i = msgLine.Pics.length; i < 9; i++) {
+        for (int i = msgLine.getPicRefs().length; i < 9; i++) {
             this.Pics[i].setVisibility(View.GONE);
         }
     }
 
     @Override
-    public void UpdateInfo(MsgLine msgLine) {
-        this.msgLine = msgLine;
+    public void UpdateInfo(MsgBase msgBase) {
+        this.msgLine = msgBase;
 
         this.ItemTitle.setVisibility(View.VISIBLE);
         this.ItemText.setVisibility(View.VISIBLE);
-        this.ItemTitle.setText(msgLine.Title);
-        this.ItemAuthor.setText(msgLine.AuthorName);
-        this.ItemText.setText(msgLine.SubTitle);
+        this.ItemTitle.setText(msgBase.getTitle());
+        this.ItemAuthor.setText(msgBase.getAuthorName());
+        this.ItemText.setText(msgBase.getSubTitle());
         if (this.ItemTitle.length() == 0) {
             this.ItemTitle.setVisibility(View.GONE);
         }
@@ -87,19 +86,19 @@ public class PictureView extends BaseView {
             this.ItemText.setVisibility(View.GONE);
         }
 
-        this.ItemTime.setText(new PrettyTime().format(new Date(msgLine.PubTime * 1000)));
-        this.ItemAuthorHead.setImageURI(Uri.parse(msgLine.AuthorCoverImg));
+        this.ItemTime.setText(new PrettyTime().format(new Date(msgBase.getPubTime() * 1000)));
+        this.ItemAuthorHead.setImageURI(Uri.parse(msgBase.getAuthorCoverImg()));
 
         width = Math.max(Body.getWidth(), width);
 
         this.SetUpdateNine();
         this.UpdateNineLayout();
 
-        for (int i = 0; i < msgLine.Pics.length; i++) {
-            this.Pics[i].setImageURI(Uri.parse(msgLine.Pics[i] + "-small"));
+        for (int i = 0; i < msgBase.getPicRefs().length; i++) {
+            this.Pics[i].setImageURI(Uri.parse(msgBase.getPicRefs()[i].getUrl()));
         }
 
-        for (int i = msgLine.Pics.length; i < 9; i++) {
+        for (int i = msgBase.getPicRefs().length; i < 9; i++) {
             this.Pics[i].setImageURI(Uri.EMPTY);
         }
     }
@@ -117,7 +116,7 @@ public class PictureView extends BaseView {
         public void onClick(View v) {
             if (pictureView != null) {
                 Intent intent = new Intent(pictureView.activity, guider.class);
-                intent.putExtra("mid", pictureView.msgLine.Id);
+                intent.putExtra("mid", pictureView.msgLine.getId());
                 intent.putExtra("clicked_pic", clicked_pic);
 
                 pictureView.activity.startActivity(intent);

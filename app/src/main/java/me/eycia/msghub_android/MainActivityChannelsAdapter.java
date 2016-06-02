@@ -71,6 +71,6 @@ public class MainActivityChannelsAdapter extends FragmentPagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        return chans[position].Title;
+        return chans[position].getTitle();
     }
 }

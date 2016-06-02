@@ -86,8 +86,8 @@ public class LeftMenuLayoutController {
         }
 
         public void showUserInfo(UserBaseInfo userBaseInfo) {
-            mUsername.setText(userBaseInfo.Nickname);
-            mHeadView.setImageURI(Uri.parse(userBaseInfo.HeadUrl));
+            mUsername.setText(userBaseInfo.getNickname());
+            mHeadView.setImageURI(Uri.parse(userBaseInfo.getHeadUrl()));
         }
     }
 

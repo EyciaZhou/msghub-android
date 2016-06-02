@@ -6,7 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 
 import me.eycia.api.API;
-import me.eycia.api.Msg;
+import me.eycia.api.MsgBase;
 
 public class guider extends AppCompatActivity {
     String mid;
@@ -25,9 +25,9 @@ public class guider extends AppCompatActivity {
 
         new API.Msgs.FullMessageGetTask(mid) {
             @Override
-            protected void onSuccess(@NonNull Msg msg) {
+            protected void onSuccess(@NonNull MsgBase msg) {
                 Intent intent_to;
-                if (msg.ViewType == API.VIEW_NORMAL) {
+                if (msg.getViewType() == API.VIEW_NORMAL) {
                     intent_to = new Intent(guider.this, MoreInfoActivity.class);
                 } else /*if (msg.ViewType == API.VIEW_PICTURE)*/ {
                     intent_to = new Intent(guider.this, pictures.class);

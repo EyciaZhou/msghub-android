@@ -12,12 +12,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import me.eycia.api.Msg;
+import me.eycia.api.MsgBase;
 import me.eycia.api.PicRef;
 import me.eycia.picScalerView.PicScalerView;
 
 public class pictures extends AppCompatActivity {
-    private Msg mMsg;
+    private MsgBase mMsg;
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
@@ -36,7 +36,7 @@ public class pictures extends AppCompatActivity {
         }
 
         if (mMsg != null) {
-            mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), mMsg.PicRefs);
+            mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), mMsg.getPicRefs());
         }
 
         // Set up the ViewPager with the sections adapter.
@@ -45,7 +45,7 @@ public class pictures extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             int firstShowPic = getIntent().getIntExtra("clicked_pic", 0);
-            if (firstShowPic >= mMsg.PicRefs.length) {
+            if (firstShowPic >= mMsg.getPicRefs().length) {
                 firstShowPic = 0;
             }
 
@@ -84,10 +84,10 @@ public class pictures extends AppCompatActivity {
             PicRef pic = getArguments().getParcelable("info");
 
             PicScalerView picScalerView = (PicScalerView) rootView.findViewById(R.id.pic_scaler_view);
-            picScalerView.SetImgUri(pic.Url);
+            picScalerView.SetImgUri(pic.getUrl());
 
             TextView textView = (TextView) rootView.findViewById(R.id.textView);
-            textView.setText(pic.Description);
+            textView.setText(pic.getDescription());
 
             return rootView;
         }

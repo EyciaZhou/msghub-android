@@ -45,7 +45,7 @@ public class ChanFragment extends Fragment {
         @Override
         public BaseView onCreateViewHolder(ViewGroup parent, int viewType) {
             if (viewType == API.VIEW_NORMAL) {
-                return NormalView.GetView(getContext(), parent, getActivity());
+                return NormalView.Companion.GetView(getContext(), parent, getActivity());
             } else if (viewType == API.VIEW_PICTURE) {
                 return PictureView.GetView(getContext(), parent, getActivity());
             } else {
@@ -65,7 +65,7 @@ public class ChanFragment extends Fragment {
 
         @Override
         public int getItemViewType(int position) {
-            return mChanFragmentData.GetItem(position).ViewType;
+            return mChanFragmentData.GetItem(position).getViewType();
         }
     };
 

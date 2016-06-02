@@ -14,13 +14,13 @@ import java.util.Vector;
 import me.eycia.Notifier;
 import me.eycia.api.API;
 import me.eycia.api.ChanInfo;
-import me.eycia.api.MsgLine;
+import me.eycia.api.MsgBase;
 
 /**
  * Created by eycia on 16/5/10.
  */
 public class ChanFragmentData {
-    private MsgLine[] msgLines = new MsgLine[0];
+    private MsgBase[] msgLines = new MsgBase[0];
     private ChanInfo chanInfo;
     private boolean noMore;
     private boolean isFetching;
@@ -30,7 +30,7 @@ public class ChanFragmentData {
     public ChanFragmentData(ChanInfo chanInfo, Bundle savedInstanceState) {
         this.chanInfo = chanInfo;
         if (savedInstanceState != null) {
-            this.msgLines = (MsgLine[]) savedInstanceState.getParcelableArray("msgLines");
+            this.msgLines = (MsgBase[]) savedInstanceState.getParcelableArray("msgLines");
             this.chanInfo = savedInstanceState.getParcelable("chanInfo");
             this.noMore = savedInstanceState.getBoolean("noMore");
         }
@@ -46,14 +46,14 @@ public class ChanFragmentData {
         return msgLines.length;
     }
 
-    public MsgLine GetItem(int index) {
+    public MsgBase GetItem(int index) {
         return msgLines[index];
     }
 
     public void GetNewer() {
-        new API.Msgs.PageGetTask(chanInfo.Id, 20, "0", -1) {
+        new API.Msgs.PageGetTask(chanInfo.getId(), 20, "0", -1) {
             @Override
-            protected void onSuccess(@NonNull MsgLine[] msgLines) {
+            protected void onSuccess(@NonNull MsgBase[] msgLines) {
                 Arrays.sort(msgLines);
                 ChanFragmentData.this.msgLines = msgLines;
             }
@@ -70,10 +70,10 @@ public class ChanFragmentData {
         if (noMore || isFetching) return;
         isFetching = true;
 
-        new API.Msgs.PageGetTask(chanInfo.Id, 20, msgLines[msgLines.length - 1].Id,
-                msgLines[msgLines.length - 1].SnapTime) {
+        new API.Msgs.PageGetTask(chanInfo.getId(), 20, msgLines[msgLines.length - 1].getId(),
+                msgLines[msgLines.length - 1].getSnapTime()) {
             @Override
-            protected void onSuccess(@NonNull MsgLine[] msgs) {
+            protected void onSuccess(@NonNull MsgBase[] msgs) {
                 if (msgs.length == 0) {
                     noMore = true;
                     Looper.prepare();
@@ -89,22 +89,22 @@ public class ChanFragmentData {
 
                 Set<String> DupRemove = new HashSet<>();
 
-                Vector<MsgLine> msgsFinal = new Vector<>();
+                Vector<MsgBase> msgsFinal = new Vector<>();
 
-                for (MsgLine m : msgs) {
+                for (MsgBase m : msgs) {
                     msgsFinal.add(m);
-                    DupRemove.add(m.Id);
+                    DupRemove.add(m.getId());
                 }
 
-                for (MsgLine m : msgLines) {
-                    if (!DupRemove.contains(m.Id)) {
+                for (MsgBase m : msgLines) {
+                    if (!DupRemove.contains(m.getId())) {
                         msgsFinal.add(m);
-                        DupRemove.add(m.Id);
+                        DupRemove.add(m.getId());
                     }
                 }
 
                 Collections.sort(msgsFinal);
-                msgLines = msgsFinal.toArray(new MsgLine[msgsFinal.size()]);
+                msgLines = msgsFinal.toArray(new MsgBase[msgsFinal.size()]);
                 MsgLinesNotifier.ChangeData();
             }
 
