@@ -30,7 +30,7 @@ object API {
         private inner class asyncTask : AsyncTask<Void, Void, answer<Result>>() {
             private fun dealWithError(e: Exception) {
                 e.printStackTrace()
-                MyApplication.showToast(e.message)
+                MyApplication.toast(e.message)
                 onError(e)
             }
 
@@ -275,18 +275,17 @@ object API {
                 val config = Configuration.Builder().connectTimeout(10).responseTimeout(10).zone(Zone.zone0).build()
                 val uploadManager = UploadManager(config)
 
-                val inputStream = MyApplication.getAppContext().contentResolver.openInputStream(uri)
+                val inputStream = MyApplication.appContext!!.contentResolver.openInputStream(uri)
                 val bytes = ByteStreams.toByteArray(inputStream!!)
 
-                val lock = java.util.concurrent.locks.ReentrantLock()
-
-                if (MyApplication.getUserBaseInfo() == null) {
+                val userBaseInfo = MyApplication.userBaseInfo
+                if (userBaseInfo == null) {
                     throw Exception("用户没有登录")
                 }
 
                 val latch = CountDownLatch(1)
 
-                uploadManager.put(bytes, MyApplication.getUserBaseInfo().Id, token, { key, info, response ->
+                uploadManager.put(bytes, userBaseInfo.Id, token, { key, info, response ->
                     o_info = info
                     o_response = response
                     latch.countDown()

@@ -41,7 +41,7 @@
                     android:layout_marginBottom="7dp">
 
                     <com.facebook.drawee.view.SimpleDraweeView
-                        android:id="@+id/ListCover"
+                        android:id="@+id/ItemAuthorHead"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         fresco:progressBarImage="@drawable/circle"

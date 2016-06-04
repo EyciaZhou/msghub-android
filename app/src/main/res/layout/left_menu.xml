@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fresco="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/left_menu"
+    android:id="@+id/mLeftMenu"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:layout_gravity="start"
@@ -17,7 +17,7 @@
         android:background="@android:color/white">
 
         <com.facebook.drawee.view.SimpleDraweeView
-            android:id="@+id/menu_background"
+            android:id="@+id/mBackgound"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="false"
@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/gradient"
-            android:layout_alignBottom="@+id/menu_background"
+            android:layout_alignBottom="@+id/mBackgound"
             android:padding="20dp"
             android:id="@+id/menu_up_login_frame">
 
@@ -50,7 +50,7 @@
             android:orientation="vertical"
             android:layout_marginStart="20dp"
             android:background="@drawable/gradient"
-            android:layout_alignBottom="@+id/menu_background"
+            android:layout_alignBottom="@+id/mBackgound"
             android:id="@+id/menu_up_logined_frame"
             android:visibility="gone">
 
@@ -63,7 +63,7 @@
                 fresco:actualImageScaleType="centerCrop"
                 fresco:roundAsCircle="true"
                 fresco:roundingBorderWidth="2dp"
-                android:id="@+id/menu_user_head" />
+                android:id="@+id/mHeadView" />
 
             <!--        fresco:roundingBorderColor="#ffffff" -->
 
@@ -72,7 +72,7 @@
                 android:layout_height="wrap_content"
                 android:text="Eycia"
                 android:textColor="#ffffff"
-                android:id="@+id/menu_username"
+                android:id="@+id/mUsername"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:textSize="20dp" />

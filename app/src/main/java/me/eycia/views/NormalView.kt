@@ -35,7 +35,7 @@ class NormalView(internal var activity: Activity, view: View, val mNormalViewHan
             }
 
             parent.ItemTime.text = PrettyTime().format(Date(msgLine.PubTime * 1000))
-            parent.ListCover.setImageURI(Uri.parse(msgLine.AuthorCoverImg))
+            parent.ItemAuthorHead.setImageURI(Uri.parse(msgLine.AuthorCoverImg))
 
             if (msgLine.CoverImg == "") {
                 parent.ItemCover.visibility = View.GONE

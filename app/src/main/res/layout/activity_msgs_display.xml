@@ -13,7 +13,7 @@
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/mToolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:popupTheme="@style/AppTheme.PopupOverlay">
@@ -25,17 +25,17 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/title_text"
+                    android:id="@+id/mTitleText"
                     android:textColor="#ffffff"
                     android:textSize="16dp"
                     android:enabled="false"
                     android:layout_alignParentEnd="false"
-                    android:layout_below="@+id/title_imgview" />
+                    android:layout_below="@+id/mTitleImage" />
 
                 <ImageView
-                    android:id="@+id/title_imgview"
+                    android:id="@+id/mTitleImage"
                     android:layout_width="match_parent"
-                    android:layout_height="fill_parent"
+                    android:layout_height="10dp"
                     android:layout_gravity="center_horizontal"
                     android:scaleType="fitStart"
                     android:src="@drawable/title_msghub"
@@ -50,7 +50,7 @@
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.widget.DrawerLayout
-        android:id="@+id/drawer_layout"
+        android:id="@+id/mDrawerLayout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_alignParentEnd="false"
@@ -68,14 +68,14 @@
             android:fitsSystemWindows="true">
 
             <android.support.design.widget.AppBarLayout
-                android:id="@+id/appbar2"
+                android:id="@+id/mAppBarLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="?attr/actionBarSize"
+                android:paddingTop="?attr/actionBarSize"
                 android:theme="@style/AppTheme.AppBarOverlay">
 
                 <com.google.view.SlidingTabLayout
-                    android:id="@+id/tabs"
+                    android:id="@+id/mSlidingTabLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/colorPrimary"
@@ -93,7 +93,7 @@
                 app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
                 <android.support.v4.view.ViewPager
-                    android:id="@+id/container"
+                    android:id="@+id/mViewPager"
                     android:layout_width="fill_parent"
                     android:layout_height="match_parent" />
 
